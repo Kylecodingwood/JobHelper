@@ -1,0 +1,19 @@
+@startuml profile-components
+title Profile 组件 (/profile)
+' Delta 链（文档）：component → layout；为可预览，不内容 include 异构图
+
+component "ProfileOnboardingWizard\nid: profile-onboarding-wizard" as wizard
+component "ProfileSectionLanguageProficiency\nid: profile-section-language-proficiency" as lang
+component "ProfileRecomputePanel\nid: profile-recompute-panel" as rec
+component "ProfileDataManagementPanel\nid: profile-data-management-panel" as data
+component "ProfileFieldUsagePopover" as pop
+component "ProfileImpactConfirmDialog" as impact
+component "ProfileExportDialog" as exp
+component "ProfileRestoreDialog" as rest
+
+lang --> pop : field info
+rec --> impact : roadmap preview
+data --> exp
+data --> rest
+
+@enduml

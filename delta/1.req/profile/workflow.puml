@@ -1,0 +1,52 @@
+@startuml
+title Profile 配置与显式重算流程
+
+start
+:加载唯一 Profile;
+if (Profile 存在?) then (否)
+  :录入教育、目标、技能经历\n及 WorkAuthorization 时间线;
+else (是)
+  :编辑当前 profileVersion;
+endif
+:校验字段与时间区间;
+if (校验通过?) then (否)
+  :显示字段错误并保留输入;
+  stop
+endif
+:比较差异并分析\nRoadmap / Gate / Rank 影响;
+:展示差异与影响摘要;
+if (用户确认保存?) then (否)
+  :不保存本次修改;
+  stop
+endif
+:原子保存并递增 profileVersion;
+if (存在派生影响?) then (否)
+  stop
+endif
+:创建 PENDING RecomputeRequest;
+if (scope 含 ROADMAP?) then (是)
+  :展示模板/锚点/任务预览;
+endif
+if (用户显式确认重算?) then (推迟)
+  :状态置为 DEFERRED;
+  stop
+elseif (确认执行?) then (否)
+  stop
+endif
+if (请求版本仍为当前版本?) then (否)
+  :状态置为 Superseded;
+  stop
+endif
+:按所选范围执行确定性重算;
+if (全部成功?) then (是)
+  :状态置为 Completed;
+else (否)
+  if (部分成功?) then (是)
+    :状态置为 PartiallyFailed;
+  else (否)
+    :状态置为 Failed;
+  endif
+endif
+:展示建议与冲突;\n保留 Job Decision、用户 Roadmap 任务及完成记录;
+stop
+@enduml

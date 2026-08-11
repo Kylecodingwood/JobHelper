@@ -1,0 +1,65 @@
+@startuml
+title Roadmap 混合模板与任务推进流程
+
+start
+partition "Template" {
+  :加载版本化 RoadmapTemplate\n(TemplateType=SYSTEM);
+  if (用户提供 Markdown?) then (是)
+    :上传或粘贴 Markdown\n(见 markdown-template-spec);
+    :解析并预览 USER 模板版本;
+    if (用户确认?) then (否)
+      :不保存用户模板;
+    else (是)
+      :保存不可变 RoadmapTemplateVersion\n(TemplateType=USER);
+    endif
+  endif
+  :以 USER 模板覆盖同键 SYSTEM 任务;
+}
+
+partition "Generation" {
+  :读取确认的 profileVersion;
+  :解析 COURSE_START、\nGRADUATE_RECRUITMENT_SEASON\n(RDM-ANCHOR-GRS-001 v1)、\nGRADUATION、STAMP_EXPIRY\n(RDM-ANCHOR-STAMP-001 v1);
+  :按 anchor + relativeOffset\n生成候选任务;
+  :校验任务键、引用与依赖 DAG;
+  if (必需输入有效?) then (否)
+    :报告错误且不创建半成品;
+    stop
+  endif
+  :展示生成/重算预览;
+  if (用户确认?) then (否)
+    stop
+  endif
+  if (Profile 重算?) then (是)
+    :仅 merge-recompute\n系统来源且未完成任务;
+    :保留用户任务/编辑/完成/\n归档/pin/覆盖;
+  else (否)
+    :原子创建 Roadmap / Task / Dependency;
+  endif
+}
+
+partition "Task & Event" {
+  :接收用户操作或\nCV / Job / Behavioral 事件;
+  if (领域事件?) then (是)
+    :按 sourceDomain + eventId 幂等检查;
+    :追加 BEHAVIORAL/CV/JOB\n事件任务，不重建基线;
+  else (否)
+    :编辑、开始、完成、恢复或归档任务;
+    if (完成且依赖未满足?) then (是)
+      :阻止常规完成并显示 blocker;
+      if (用户提供理由并确认覆盖?) then (是)
+        :记录 DependencyOverride;
+        :完成当前任务，不修改前置任务;
+      else (否)
+        :保持原任务状态;
+      endif
+    endif
+  endif
+}
+
+partition "Actionability & Events" {
+  :计算 actionability\n(ACTIONABLE/BLOCKED/UNSCHEDULED);
+  :发布 Roadmap 任务/可执行性事件\n供 Action 域消费;
+  :Roadmap 展示摘要;\n可选导航至 Action Home;
+}
+stop
+@enduml

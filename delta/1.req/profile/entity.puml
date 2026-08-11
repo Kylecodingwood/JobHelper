@@ -1,0 +1,124 @@
+@startuml
+title Profile 实体图
+hide methods
+skinparam classAttributeIconSize 0
+
+class Profile {
+  +profileId: UUID
+  +profileVersion: Integer
+  +createdAt: DateTime
+  +updatedAt: DateTime
+}
+
+class EducationPeriod {
+  +educationPeriodId: UUID
+  +institutionName: String
+  +programmeName: String
+  +startDate: Date
+  +expectedGraduationDate: Date
+  +countryCode: String
+  +isPrimary: Boolean
+}
+
+class WorkAuthorization {
+  +workAuthorizationId: UUID
+  +countryCode: String
+  +permissionType: PermissionType
+  +validFrom: Date
+  +validUntil: Date
+  +weeklyHoursLimit: Decimal
+  +isFuture: Boolean
+}
+
+enum PermissionType {
+  STAMP_2
+  STAMP_1G
+  STAMP_1
+  STAMP_4
+  EU_EEA_CITIZEN
+  OTHER
+}
+
+class TargetRole {
+  +targetRoleId: UUID
+  +roleName: String
+  +seniority: Seniority
+  +location: String
+  +priorityOrder: Integer
+  +active: Boolean
+}
+
+enum Seniority {
+  INTERNSHIP
+  GRADUATE
+  JUNIOR
+  MID
+  OTHER
+}
+
+class LanguageProficiency {
+  +languageProficiencyId: UUID
+  +languageCode: String
+  +proficiency: LanguageProficiencyLevel
+  +evidenceRef: String?
+  +notes: String?
+}
+
+enum LanguageProficiencyLevel {
+  NATIVE
+  C2
+  C1
+  B2
+  B1
+  A2
+  A1
+  UNKNOWN
+}
+
+class SkillEvidence {
+  +skillEvidenceId: UUID
+  +skillName: String
+  +proficiency: Proficiency
+  +evidenceType: EvidenceType
+  +evidenceRef: String
+}
+
+class ExperienceEvidence {
+  +experienceEvidenceId: UUID
+  +title: String
+  +experienceType: ExperienceType
+  +startDate: Date
+  +endDate: Date
+}
+
+class RecomputeRequest {
+  +recomputeRequestId: UUID
+  +profileVersion: Integer
+  +scopes: RecomputeScope[]
+  +status: RecomputeStatus
+  +changeSummary: Text
+}
+
+Profile "1" *-- "1..*" EducationPeriod
+Profile "1" *-- "1..*" WorkAuthorization
+Profile "1" *-- "1..*" TargetRole
+Profile "1" *-- "0..*" LanguageProficiency
+Profile "1" *-- "0..*" SkillEvidence
+Profile "1" *-- "0..*" ExperienceEvidence
+Profile "1" --> "0..*" RecomputeRequest : produces
+SkillEvidence "0..*" --> "0..1" ExperienceEvidence : supported by
+WorkAuthorization --> PermissionType
+TargetRole --> Seniority
+LanguageProficiency --> LanguageProficiencyLevel
+
+note bottom of Profile
+  v1 全库仅一个 Profile；
+  修改递增 profileVersion。
+end note
+
+note bottom of RecomputeRequest
+  显式确认后执行；
+  ROADMAP 须先预览确认；
+  不得覆盖用户决定。
+end note
+@enduml

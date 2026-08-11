@@ -1,0 +1,152 @@
+@startuml
+title Action 域持久化模型
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+enum SourceDomain {
+  JOB
+  ROADMAP
+  CV
+  BEHAVIORAL
+}
+enum ActionKind {
+  REVIEW_NEW_JOB
+  RESOLVE_GATE
+  COMPLETE_ROADMAP_TASK
+  REVIEW_CV_SUGGESTIONS
+  COMPLETE_BEHAVIORAL_ANSWER
+}
+enum ActionStatus {
+  OPEN
+  BLOCKED
+  COMPLETED
+  IGNORED
+  STALE
+}
+enum CompletionMode {
+  SOURCE_EVENT
+  USER_CONFIRMED
+}
+enum PriorityBand {
+  DEADLINE
+  BLOCKER
+  USER_PIN
+  SYSTEM_SUGGESTION
+  NORMAL
+}
+enum PriorityFactor {
+  DEADLINE
+  BLOCKER
+  USER_PIN
+  SYSTEM_SUGGESTION
+}
+enum ActionOperation {
+  PIN
+  UNPIN
+  COMPLETE
+  IGNORE
+  RESTORE
+}
+enum ReceiptStatus {
+  RECEIVED
+  PROCESSED
+  FAILED
+  IGNORED_STALE
+}
+enum TargetType {
+  CANONICAL_JOB
+  ROADMAP_TASK
+  CV_REVIEW
+  CV_SUGGESTION
+  BEHAVIORAL_ANSWER
+}
+
+class action_item <<table>> {
+  +action_id: UUID <<PK>>
+  +source_domain: SourceDomain
+  +action_kind: ActionKind
+  +title: TEXT
+  +status: ActionStatus
+  +active: BOOLEAN
+  +deadline: TIMESTAMPTZ?
+  +pinned: BOOLEAN
+  +priority_band: PriorityBand
+  +priority_sort_key: VARCHAR
+  +generation_rule_version: VARCHAR
+  +source_object_version: VARCHAR
+  +version: INT
+}
+
+class action_target_ref <<table>> {
+  +action_id: UUID <<PK,FK>>
+  +target_type: TargetType
+  +target_id: UUID
+  +route_hint: VARCHAR?
+  +focus_key: VARCHAR?
+}
+
+class action_generation_evidence <<table>> {
+  +generation_evidence_id: UUID <<PK>>
+  +action_id: UUID <<FK>>
+  +event_id: VARCHAR
+  +event_type: VARCHAR
+  +reason_code: VARCHAR
+  +facts: JSONB
+}
+
+class action_priority_evidence <<table>> {
+  +priority_evidence_id: UUID <<PK>>
+  +action_id: UUID <<FK>>
+  +calculation_id: UUID
+  +factor: PriorityFactor
+  +effective_order: INT
+  +fact_value: VARCHAR
+}
+
+class action_dependency <<table>> {
+  +dependency_id: UUID <<PK>>
+  +blocked_action_id: UUID <<FK>>
+  +blocking_action_id: UUID <<FK?>>
+  +status: DependencyStatus
+}
+
+class action_decision <<table>> {
+  +action_decision_id: UUID <<PK>>
+  +action_id: UUID <<FK>>
+  +operation: ActionOperation
+  +based_on_version: INT
+}
+
+class action_domain_event_receipt <<table>> {
+  +receipt_id: UUID <<PK>>
+  +event_id: VARCHAR
+  +consumer: VARCHAR
+  +source_domain: SourceDomain
+  +status: ReceiptStatus
+}
+
+action_item "1" *-- "1" action_target_ref
+action_item "1" *-- "1..*" action_generation_evidence
+action_item "1" *-- "0..*" action_priority_evidence
+action_item "1" *-- "0..*" action_decision
+action_dependency "*" --> action_item : blocked
+action_dependency "*" --> action_item : blocking
+action_domain_event_receipt ..> action_item : affects
+
+note right of action_item
+  业务键 UNIQUE (active=true):
+  domain + target + kind + ruleVersion
+  Home Actions 唯一拥有
+end note
+
+note bottom of action_priority_evidence
+  顺序: deadline → blocker
+  → pin → suggestion
+end note
+
+note bottom of action_domain_event_receipt
+  幂等: consumer + sourceDomain + eventId
+  IGNORED_STALE 不回滚投影
+end note
+@enduml

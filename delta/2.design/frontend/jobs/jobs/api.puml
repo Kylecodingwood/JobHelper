@@ -1,0 +1,35 @@
+@startuml jobs-inbox-api
+title Jobs Inbox API — 对齐后端
+' 契约：server/job/job-api；详情优先 JobDetailDto，少打 evidence
+
+actor User
+boundary "JobsPage" as page
+control "JobsApiClient" as client
+entity "Backend /api/v1" as api
+
+User -> page : browse / decide
+page -> client : GET /jobs
+client -> api
+api --> client : Page JobSummaryDto
+
+page -> client : GET /jobs/{jobId}
+client -> api
+api --> client : JobDetailDto\n(gate+rank+dup summary)
+
+page -> client : PATCH /jobs/{id}/status
+client -> api
+api --> client : JobDetailDto or 409
+
+page -> client : POST /jobs/{id}/gate-override
+client -> api
+api --> client : JobDetailDto
+
+page -> client : POST /jobs/manual-url
+client -> api
+api --> client : JobDetailDto
+
+page -> client : POST duplicates confirm/reject
+client -> api
+api --> client : MergeResult or 204
+
+@enduml

@@ -1,0 +1,110 @@
+@startuml
+title Action 域实体关系
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class Action <<aggregate root>> {
+  +actionId: UUID
+  +sourceDomain: SourceDomain
+  +actionKind: String
+  +title: String
+  +status: ActionStatus
+  +active: Boolean
+  +deadline: Instant?
+  +pinned: Boolean
+  +pinnedAt: Instant?
+  +completionMode: CompletionMode?
+  +generationRuleVersion: String
+  +sourceObjectVersion: String
+  +priorityBand: PriorityBand
+  +prioritySortKey: String
+  +version: Integer
+}
+
+class TargetRef <<value object>> {
+  +targetType: TargetType
+  +targetId: String
+  +routeHint: String?
+  +focusKey: String?
+}
+
+class ActionGenerationEvidence {
+  +generationEvidenceId: UUID
+  +eventId: String
+  +eventType: String
+  +sourceObjectVersion: String
+  +ruleId: String
+  +ruleVersion: String
+  +reasonCode: String
+  +explanation: String
+  +createdAt: Instant
+}
+
+class ActionPriorityEvidence {
+  +priorityEvidenceId: UUID
+  +calculationId: UUID
+  +factor: PriorityFactor
+  +factValue: String
+  +effectiveOrder: Integer
+  +ruleVersion: String
+  +explanation: String
+  +calculatedAt: Instant
+}
+
+class ActionDependency {
+  +dependencyId: UUID
+  +conditionRef: String?
+  +status: DependencyStatus
+  +reason: String
+  +resolvedAt: Instant?
+}
+
+class ActionDecision {
+  +actionDecisionId: UUID
+  +operation: ActionOperation
+  +reason: String?
+  +actor: USER
+  +basedOnVersion: Integer
+  +createdAt: Instant
+}
+
+class DomainEventReceipt {
+  +eventId: String
+  +consumer: String
+  +sourceDomain: SourceDomain
+  +targetId: String
+  +sourceVersion: String
+  +status: ReceiptStatus
+  +errorCode: String?
+  +receivedAt: Instant
+  +processedAt: Instant?
+}
+
+Action "1" *-- "1" TargetRef
+Action "1" *-- "1..*" ActionGenerationEvidence
+Action "1" *-- "0..*" ActionPriorityEvidence
+Action "1" *-- "0..*" ActionDecision
+ActionDependency "*" --> "1" Action : blocked
+ActionDependency "*" --> "0..1" Action : blocking
+DomainEventReceipt "1" --> "0..*" Action : affects
+
+note right of Action
+  活动业务键唯一（active=true）；
+  status: OPEN/BLOCKED/COMPLETED/
+  IGNORED/STALE；
+  操作: PIN/UNPIN/COMPLETE/
+  IGNORE/RESTORE；
+  Home Actions 仅 Action 域拥有。
+end note
+
+note bottom of ActionPriorityEvidence
+  固定比较顺序：
+  deadline → blocker → user pin
+  → system suggestion。
+end note
+
+note bottom of ActionDependency
+  禁止自依赖和活动依赖环。
+end note
+@enduml

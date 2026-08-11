@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <a class="active" href="index.html">Home</a>
+        <a href="jobs.html">Jobs</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="profile.html">Profile</a>
+        <span class="nav-soon">CV · Behavioral（即将推出）</span>
+      </div>
+      <div class="nav-meta">M1 原型 · Dublin</div>
+    </nav>
+
+    <div class="page">
+      <div class="topbar">
+        <h1>今日优先</h1>
+        <span style="color:var(--ink-muted);font-size:13px">周四 · 30 Jul</span>
+        <div class="spacer"></div>
+        <a class="btn btn-sm" href="roadmap.html">Roadmap</a>
+        <a class="btn btn-sm" href="jobs.html">Jobs</a>
+        <button class="btn btn-sm" type="button" title="刷新">↻ 刷新</button>
+      </div>
+
+      <div class="banner" id="banner">
+        <strong>部分域降级</strong>
+        <span>Behavioral 服务暂不可用；已保留其余 Action。</span>
+        <div class="spacer"></div>
+        <button class="btn btn-sm" type="button" onclick="document.getElementById('banner').remove()">关闭</button>
+      </div>
+
+      <div class="main-col">
+        <section class="section">
+          <div class="section-head">
+            <h2>今日优先</h2>
+            <span class="count">5 条 OPEN</span>
+          </div>
+
+          <div class="action-list">
+            <article class="action-card band-deadline" onclick="location.href='jobs.html'">
+              <div>
+                <h3 class="action-title">确认 Gate：Work Auth 待核实</h3>
+                <div class="action-meta">
+                  <span class="badge badge-job">JOB</span>
+                  <span>截止 今日 18:00</span>
+                  <span class="badge badge-pin">PIN</span>
+                </div>
+              </div>
+              <div class="action-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-sm" type="button" onclick="openDrawer()">为何优先</button>
+                <button class="btn btn-sm" type="button" onclick="openMenu()">⋯</button>
+              </div>
+              <p class="reason">主依据：deadline — Stamp 相关岗位需在今日前确认工作许可窗口</p>
+            </article>
+
+            <article class="action-card band-blocker" onclick="location.href='roadmap.html'">
+              <div>
+                <h3 class="action-title">完成：更新 LinkedIn 摘要</h3>
+                <div class="action-meta">
+                  <span class="badge badge-roadmap">ROADMAP</span>
+                  <span>先完成阻塞任务</span>
+                </div>
+              </div>
+              <div class="action-actions" onclick="event.stopPropagation()">
+                <button class="btn btn-sm" type="button" onclick="openDrawer()">为何优先</button>
+                <button class="btn btn-sm" type="button">⋯</button>
+              </div>
+              <p class="reason">主依据：blocker — 「准备 CV 初稿」仍未完成</p>
+            </article>
+
+            <article class="action-card band-pin">
+              <div>
+                <h3 class="action-title">查看新职位：Backend Engineer · Stripe</h3>
+                <div class="action-meta">
+                  <span class="badge badge-job">JOB</span>
+                  <span class="badge badge-pin">你置顶的</span>
+                </div>
+              </div>
+              <div class="action-actions">
+                <button class="btn btn-sm" type="button" onclick="event.stopPropagation();openDrawer()">为何优先</button>
+                <button class="btn btn-sm" type="button">⋯</button>
+              </div>
+              <p class="reason">主依据：user pin — 你手动置顶，保留在优先序列</p>
+            </article>
+
+            <article class="action-card band-suggest">
+              <div>
+                <h3 class="action-title">完成 Roadmap：爱尔兰求职季时间线核对</h3>
+                <div class="action-meta">
+                  <span class="badge badge-roadmap">ROADMAP</span>
+                  <span style="color:#6b7280">建议</span>
+                </div>
+              </div>
+              <div class="action-actions">
+                <button class="btn btn-sm" type="button" onclick="event.stopPropagation();openDrawer()">为何优先</button>
+                <button class="btn btn-sm" type="button">⋯</button>
+              </div>
+              <p class="reason">主依据：system suggestion — 距 Sep-1 招聘季还有 32 天</p>
+            </article>
+
+            <article class="action-card band-suggest stale">
+              <div>
+                <h3 class="action-title">复核可能重复职位（数据可能过期）</h3>
+                <div class="action-meta">
+                  <span class="badge badge-job">JOB</span>
+                  <span style="color:var(--warn)">STALE — 请刷新</span>
+                </div>
+              </div>
+              <div class="action-actions">
+                <button class="btn btn-sm" type="button" disabled title="STALE 禁用导航">打开</button>
+                <button class="btn btn-sm" type="button">⋯</button>
+              </div>
+              <p class="reason">源对象版本已变；完成/忽略前请刷新首页</p>
+            </article>
+          </div>
+
+          <details class="blocked" style="margin-top:12px">
+            <summary>阻塞中 1 项</summary>
+            <p style="margin:8px 0 0">「准备行为面试答案」被「完成 CV 初稿」阻塞 — 先完成 Roadmap 任务可解除。</p>
+          </details>
+        </section>
+
+        <section class="section">
+          <div class="section-head">
+            <h2>新职位</h2>
+            <span class="count">status = NEW · 不自动 Shortlist</span>
+            <a class="link" href="jobs.html">查看全部 →</a>
+          </div>
+          <div class="new-jobs">
+            <a class="new-job" href="jobs.html">
+              <span class="tier-dot tier-high" title="HIGH"></span>
+              <div>
+                <h3>Graduate Software Engineer</h3>
+                <p>Intercom · Dublin · HIGH</p>
+              </div>
+            </a>
+            <a class="new-job" href="jobs.html">
+              <span class="tier-dot tier-med" title="MEDIUM"></span>
+              <div>
+                <h3>Junior Backend · Java</h3>
+                <p>Workday · Dublin · MEDIUM</p>
+              </div>
+            </a>
+            <a class="new-job" href="jobs.html">
+              <span class="tier-dot tier-low" title="LOW"></span>
+              <div>
+                <h3>Platform Engineer</h3>
+                <p>HubSpot · Remote IE · LOW</p>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="drawer" onclick="if(event.target===this)closeDrawer()">
+    <aside class="drawer" role="dialog" aria-label="优先级解释">
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <h2>为何优先</h2>
+          <div class="sub">确认 Gate：Work Auth 待核实</div>
+        </div>
+        <button class="btn btn-icon" type="button" onclick="closeDrawer()">✕</button>
+      </div>
+      <div class="evidence">
+        <ol>
+          <li><strong>1 · Deadline</strong>预期开始日临近；Stamp 窗口需今日确认</li>
+          <li><strong>2 · User pin</strong>你已置顶该 Action</li>
+          <li><strong>3 · System suggestion</strong>与 Target Role「Backend」匹配的 New Job 关联</li>
+        </ol>
+      </div>
+      <p style="font-size:12px;color:var(--ink-muted);margin-top:16px">不展示不透明总分；顺序 = deadline → blocker → pin → suggestion</p>
+      <div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" type="button">取消置顶</button>
+        <button class="btn btn-sm btn-primary" type="button" onclick="openMenu()">标记完成</button>
+        <button class="btn btn-sm" type="button">忽略</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="modal-center" id="menu" onclick="if(event.target===this)closeMenu()">
+    <div class="modal">
+      <h2>Action 操作</h2>
+      <p>COMPLETE / IGNORE / PIN — 不修改 Job 源状态；需带 basedOnVersion。</p>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closeMenu()">取消</button>
+        <button class="btn btn-primary" type="button" onclick="closeMenu();closeDrawer()">确认完成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="prototype-tag">prototype · 非最终 UI</div>
+  <script>
+    function openDrawer(){ document.getElementById('drawer').classList.add('open'); }
+    function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
+    function openMenu(){ document.getElementById('menu').classList.add('open'); }
+    function closeMenu(){ document.getElementById('menu').classList.remove('open'); }
+  </script>
+</body>
+</html>

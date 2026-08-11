@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Onboarding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .wizard {
+      width: min(640px, 100%);
+      margin: 32px auto 48px;
+      padding: 0 20px;
+    }
+    .steps {
+      display: flex; gap: 8px; margin-bottom: 24px;
+    }
+    .steps span {
+      flex: 1; text-align: center; padding: 8px; border-radius: 8px;
+      font-size: 12px; font-weight: 600; background: rgba(255,255,255,0.5);
+      border: 1px solid var(--line); color: var(--ink-muted);
+    }
+    .steps span.on { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); }
+    .hero-brand {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      margin: 0 0 8px;
+      letter-spacing: -0.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <span class="nav-soon">完成档案后解锁 Home / Jobs / Roadmap</span>
+      </div>
+      <a class="btn btn-sm" href="profile.html">Edit 模式</a>
+    </nav>
+
+    <div class="wizard">
+      <p class="hero-brand">Job <span style="color:var(--brand)">Helper</span></p>
+      <p style="color:var(--ink-muted);margin:0 0 20px">爱尔兰本地求职准备 · 先建立 Profile</p>
+
+      <div class="steps">
+        <span class="on">1 教育</span>
+        <span>2 工签</span>
+        <span>3 目标岗位</span>
+        <span>4 语言</span>
+      </div>
+
+      <div class="form-card">
+        <h3>Step 1 · Education</h3>
+        <div class="field"><label>院校</label><input placeholder="University College Dublin" /></div>
+        <div class="field"><label>专业</label><input placeholder="Computer Science" /></div>
+        <div class="field-row">
+          <div class="field"><label>开始</label><input type="date" /></div>
+          <div class="field"><label>预计毕业</label><input type="date" /></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+          <button class="btn" type="button" disabled>上一步</button>
+          <button class="btn btn-primary" type="button">下一步</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="prototype-tag">prototype · /profile?mode=onboarding</div>
+</body>
+</html>

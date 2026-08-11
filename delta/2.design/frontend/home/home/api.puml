@@ -1,0 +1,29 @@
+@startuml home-api
+title Home API (/) — 对齐后端
+' 契约：server/action/action-api；优化：主入口仅 /home
+
+actor User
+participant "HomePageShell" as UI
+participant "GET /api/v1/home" as H
+participant "GET .../priority-evidence" as P
+participant "GET .../navigation" as N
+participant "POST .../decisions" as D
+
+User -> UI : open /
+UI -> H : actionLimit=5&newJobLimit=10
+H --> UI : HomeFeedDto
+
+User -> UI : why priority
+UI -> P : actionId
+P --> UI : PriorityExplanationDto
+
+User -> UI : open Action
+UI -> N : actionId
+N --> UI : route + focusKey
+UI -> UI : navigate
+
+User -> UI : pin / complete / ignore
+UI -> D : operation + expectedVersion
+D --> UI : ActionDetailDto
+
+@enduml

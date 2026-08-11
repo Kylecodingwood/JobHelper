@@ -1,0 +1,65 @@
+@startuml
+title Profile REST API（/api/v1/profile*）
+skinparam componentStyle rectangle
+
+actor "React /profile" as FE
+
+package "Profile API" {
+  [GET /profile] as G1
+  [PUT /profile] as U1
+  [POST /profile/validate] as V1
+  [GET /profile/field-usage] as G2
+  [GET /profile/recompute-requests/current] as G3
+  [POST /profile/recompute-requests/{id}/preview] as P1
+  [POST /profile/recompute-requests/{id}/confirm] as C1
+  [POST /profile/recompute-requests/{id}/defer] as D1
+  [GET /profile/backups] as B1
+  [POST /profile/backups/export] as B2
+  [GET /profile/backups/{id}/restore-preview] as B3
+  [POST /profile/backups/{id}/restore] as B4
+}
+
+component ProfileApplicationService
+component RecomputeRequestService
+component ProfileBackupService
+component RoadmapRecomputePort
+component JobGateRecomputePort
+component JobRankRecomputePort
+
+FE --> G1
+FE --> U1
+FE --> V1
+FE --> G2
+FE --> G3
+FE --> P1
+FE --> C1
+FE --> D1
+FE --> B1
+FE --> B2
+FE --> B3
+FE --> B4
+
+G1 --> ProfileApplicationService
+U1 --> ProfileApplicationService
+V1 --> ProfileApplicationService
+G2 --> ProfileApplicationService
+G3 --> RecomputeRequestService
+P1 --> RecomputeRequestService
+C1 --> RecomputeRequestService
+D1 --> RecomputeRequestService
+B1 --> ProfileBackupService
+B2 --> ProfileBackupService
+B3 --> ProfileBackupService
+B4 --> ProfileBackupService
+
+P1 ..> RoadmapRecomputePort : ROADMAP preview
+C1 ..> RoadmapRecomputePort : merge confirm
+C1 ..> JobGateRecomputePort
+C1 ..> JobRankRecomputePort
+
+note right of C1
+  ROADMAP scope 须
+  roadmapPreviewToken +
+  confirmRoadmapPreview
+end note
+@enduml

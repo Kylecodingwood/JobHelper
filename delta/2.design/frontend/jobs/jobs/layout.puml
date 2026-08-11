@@ -1,0 +1,42 @@
+@startuml jobs-inbox-layout
+title Jobs Inbox 布局 (/jobs)
+
+skinparam rectangle {
+  BorderColor #333
+  BackgroundColor #FAFAFA
+}
+
+rectangle "JobsPageShell\n(100% viewport)" as shell {
+  rectangle "JobsTopBar\n48px" as top #E8EEF4
+  rectangle "JobsFilterBar\n40-56px" as filter #EEF2E6
+  rectangle "JobsMainSplit\nflex 1" as split {
+    rectangle "JobsListPane\n~60% width\nvirtual scroll\ncompact rows 52px" as list #FFFFFF
+    rectangle "JobsDetailPane\n~40% width\nscroll sections" as detail #F5F5F5 {
+      rectangle "DetailHeader" as dh
+      rectangle "StatusBar" as sb
+      rectangle "GateSection" as gate
+      rectangle "RankSection" as rank
+      rectangle "SourcesSection\n(collapsible)" as src
+      rectangle "DuplicatePanel\n(conditional)" as dup
+      rectangle "DecisionHistory\n(collapsible)" as hist
+      rectangle "GateOverrideForm\n(conditional)" as override
+    }
+  }
+}
+
+top -[hidden]down- filter
+filter -[hidden]down- split
+list -[hidden]right- detail
+
+note right of list
+  默认 Inbox：非归档、
+  非 Gate FAILED 隐藏、
+  非 EXPIRED 隐藏
+end note
+
+note bottom of detail
+  未选中时显示
+  JobsDetailPlaceholder
+end note
+
+@enduml

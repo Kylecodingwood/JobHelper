@@ -1,0 +1,43 @@
+@startuml
+title Profile 备份 / 导出 / 恢复（WF-PRO-BACKUP）
+start
+
+partition "自动备份 UC-PRO-005" {
+  :周日 03:00 调度触发;
+  if (存储可写?) then (否)
+    :记录失败;\n主库不变;
+    stop
+  endif
+  :pg_dump 全库;
+  :打包 zip + SHA256;
+  :写入 ProfileBackupMetadata\n(type=SCHEDULED);
+  :保留最新 4 份 SCHEDULED;\n删除更旧文件;
+}
+
+partition "手动导出 UC-PRO-006" {
+  :POST /profile/backups/export;
+  :用户确认路径与敏感提示;
+  :生成同格式 zip;
+  :登记 MANUAL_EXPORT;
+  note right: 不修改主库
+}
+
+partition "恢复 UC-PRO-007" {
+  :GET restore-preview;
+  :校验 checksum + schema;
+  :生成 restorePreviewToken;
+  :展示将替换域与计数;
+  if (用户二次确认?) then (否)
+    stop
+  endif
+  :POST restore\n(confirmOverwrite + token);
+  :pg_restore 覆盖库;
+  if (成功?) then (是)
+    :建议创建 PENDING RecomputeRequest;\n不自动重算;
+  else (否)
+    :报告失败状态;
+  endif
+}
+
+stop
+@enduml

@@ -1,0 +1,166 @@
+@startuml
+title Behavioral 领域逻辑实体图
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class BehavioralQuestion {
+  questionId
+  text
+  competencyTopic
+  sourceType
+  curationVersion
+  visibility
+}
+
+class STAREvidence <<AggregateRoot>> {
+  evidenceId
+  title
+  currentRevisionId
+  status
+}
+
+class STAREvidenceRevision {
+  revisionId
+  parentRevisionId
+  situation
+  task
+  action
+  result
+  competencyTags
+}
+
+class BehavioralAnswer <<AggregateRoot>> {
+  answerId
+  questionId
+  currentVersionId
+  status
+}
+
+class AnswerVersion {
+  answerVersionId
+  parentVersionId
+  versionNumber
+  questionTextSnapshot
+  answerText
+  revisionSource
+  createdAt
+}
+
+class AnswerEvidenceLink {
+  answerVersionId
+  evidenceRevisionId
+  usageNote
+}
+
+class AnswerFeedback {
+  feedbackId
+  answerVersionId
+  ruleVersion
+  promptVersion
+  status
+}
+
+class AnswerFeedbackItem {
+  feedbackItemId
+  dimension
+  targetQuote
+  targetLocation
+  issue
+  rationale
+  suggestion
+  origin
+  factCheckStatus
+  decision
+}
+
+class AppliedFeedback {
+  answerVersionId
+  feedbackItemId
+}
+
+class AIConsent <<GlobalRegistryProjection>> {
+  consentId
+  dataCategory
+  scopeVersion
+  status
+  grantedAt
+  revokedAt
+}
+
+class AIInvocation {
+  invocationId
+  provider
+  model
+  inputVersionRefs
+  promptVersion
+  cacheKey
+  cacheStatus
+  costMetadata
+  outputRef
+  status
+}
+
+class SensitiveDeletionAudit {
+  auditId
+  eventType
+  opaqueObjectToken
+  deletedCounts
+  result
+  occurredAt
+}
+
+enum QuestionSource {
+  CURATED
+  USER_DEFINED
+}
+
+enum FeedbackDimension {
+  STAR_COMPLETENESS
+  EVIDENCE_SPECIFICITY
+}
+
+enum FeedbackDecision {
+  UNDECIDED
+  ACCEPTED
+  REJECTED
+  IGNORED
+}
+
+BehavioralQuestion "1" -- "0..*" BehavioralAnswer : 题目
+BehavioralQuestion ..> QuestionSource
+STAREvidence "1" *-- "1..*" STAREvidenceRevision : 修订
+STAREvidenceRevision "0..1 父" <-- "0..* 子" STAREvidenceRevision
+BehavioralAnswer "1" *-- "1..*" AnswerVersion : 版本
+AnswerVersion "0..1 父" <-- "0..* 子" AnswerVersion
+AnswerVersion "1" -- "0..*" AnswerEvidenceLink
+STAREvidenceRevision "1" -- "0..*" AnswerEvidenceLink
+AnswerVersion "1 输入" <-- "0..*" AnswerFeedback
+AnswerFeedback "1" *-- "0..*" AnswerFeedbackItem
+AnswerFeedbackItem ..> FeedbackDimension
+AnswerFeedbackItem ..> FeedbackDecision
+AnswerVersion "1 修订" -- "0..*" AppliedFeedback
+AnswerFeedbackItem "1" -- "0..1" AppliedFeedback
+AnswerFeedback "1" *-- "0..*" AIInvocation
+AIConsent ..> AIInvocation : 全局注册表按类别授权
+
+note right of AnswerVersion
+保存后不可覆盖；
+v1 仅纯文本，无音频字段
+end note
+
+note bottom of AnswerFeedbackItem
+必须引用答案片段；
+不得表达成功概率；
+FACT_CONFLICT 不可接受
+end note
+
+note bottom of AIConsent
+全局 ai-consent.md 的域内投影
+end note
+
+note bottom of SensitiveDeletionAudit
+删除后唯一保留记录；
+不含答案、STAR、提示或 AI 输出
+end note
+@enduml

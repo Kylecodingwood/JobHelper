@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="jobs.html">Jobs</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a class="active" href="profile.html">Profile</a>
+        <span class="nav-soon">CV · Behavioral（即将推出）</span>
+      </div>
+      <div class="nav-meta">Edit 模式</div>
+    </nav>
+
+    <div class="page">
+      <div class="topbar">
+        <h1>Profile</h1>
+        <span style="font-size:12px;color:var(--ink-muted)">version 12 · lifecycle ACTIVE</span>
+        <div class="spacer"></div>
+        <a class="btn btn-sm" href="profile-onboarding.html">看 Onboarding 原型</a>
+        <button class="btn btn-sm btn-primary" type="button" onclick="document.getElementById('impact').classList.add('open')">保存</button>
+      </div>
+
+      <div class="profile-split">
+        <div>
+          <div class="form-card">
+            <h3>Education</h3>
+            <div class="field-row">
+              <div class="field"><label>院校</label><input value="University College Dublin" /></div>
+              <div class="field"><label>专业</label><input value="Computer Science" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>开始</label><input type="date" value="2022-09-01" /></div>
+              <div class="field"><label>预计毕业</label><input type="date" value="2026-06-15" /></div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>Work Authorization</h3>
+            <div class="field-row">
+              <div class="field"><label>类型</label><select><option>Stamp 1</option><option>Stamp 1G</option><option>EU Citizen</option></select></div>
+              <div class="field"><label>国家</label><input value="IE" /></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>有效起</label><input type="date" value="2025-09-01" /></div>
+              <div class="field"><label>有效至</label><input type="date" value="2027-03-01" /></div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>Target Role</h3>
+            <div class="field-row">
+              <div class="field"><label>角色</label><input value="Graduate Backend Engineer" /></div>
+              <div class="field"><label>地点</label><input value="Dublin / Ireland remote" /></div>
+            </div>
+          </div>
+
+          <div class="form-card">
+            <h3>Language Proficiency</h3>
+            <div class="field-row">
+              <div class="field"><label>语言</label><input value="English" /></div>
+              <div class="field"><label>水平</label><select><option>C1</option><option selected>B2</option><option>B1</option></select></div>
+            </div>
+            <p style="margin:0;font-size:12px;color:var(--ink-muted)">用于 Gate LANGUAGE 维度</p>
+          </div>
+
+          <div class="form-card">
+            <h3>Skills / Experience</h3>
+            <div class="field"><label>技能</label><input value="Java, Spring Boot, PostgreSQL, React" /></div>
+            <div class="field"><label>经历摘要</label><textarea rows="3">Internship · payments API · Dublin 2025</textarea></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="side-panel">
+            <h3>重算请求</h3>
+            <p>PENDING · 影响 ROADMAP / JOB_GATE / JOB_RANK</p>
+            <button class="btn btn-sm btn-primary" type="button" onclick="document.getElementById('impact').classList.add('open')">预览并确认</button>
+            <button class="btn btn-sm" type="button" style="margin-left:6px">稍后处理</button>
+          </div>
+          <div class="side-panel">
+            <h3>数据管理</h3>
+            <p>自动备份：周日 03:00 · 保留 4 份 · ./data/backups</p>
+            <button class="btn btn-sm" type="button">导出</button>
+            <button class="btn btn-sm" type="button" style="margin-left:6px">恢复…</button>
+          </div>
+          <div class="side-panel">
+            <h3>字段用途</h3>
+            <p>Target Role → JobSpy searchTerms ∪ 手动覆盖<br/>Work Auth + Language → Gate<br/>Graduation → Roadmap 锚点</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-center" id="impact" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <h2>保存影响预览</h2>
+      <p>毕业日变更将触发 Roadmap 预览确认；Gate/Rank 将按新 Profile 重算。不会自动 Shortlist。</p>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="document.getElementById('impact').classList.remove('open')">取消</button>
+        <button class="btn btn-primary" type="button" onclick="document.getElementById('impact').classList.remove('open')">确认保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="prototype-tag">prototype · /profile</div>
+</body>
+</html>

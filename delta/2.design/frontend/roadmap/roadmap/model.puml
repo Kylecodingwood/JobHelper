@@ -1,0 +1,47 @@
+@startuml roadmap-model
+title Roadmap 视图模型 (/roadmap)
+' Delta 链（文档）：model → component；为可预览，不内容 include 异构图
+hide circle
+skinparam classAttributeIconSize 0
+
+class RoadmapPageViewModel {
+  templateUpdateAvailable: boolean
+}
+
+class RoadmapSummaryVM {
+  roadmapId: UUID
+  title: string
+  status: string
+}
+
+class RoadmapTaskRowVM {
+  taskId: UUID
+  status: string
+  actionability: string
+  origin: string
+  version: int
+}
+
+class RoadmapTaskDetailVM {
+  taskId: UUID
+  completionCriteria: string
+}
+
+class TaskDependencyVM {
+  dependsOnTaskId: UUID
+  state: string
+}
+
+RoadmapPageViewModel *-- RoadmapSummaryVM
+RoadmapPageViewModel *-- RoadmapTaskRowVM
+RoadmapTaskRowVM --> RoadmapTaskDetailVM
+RoadmapTaskDetailVM *-- TaskDependencyVM
+
+note right of RoadmapTaskRowVM
+  status: TODO / IN_PROGRESS / COMPLETED / ARCHIVED
+  actionability: ACTIONABLE / BLOCKED / UNSCHEDULED
+  Task status != Action status
+  Roadmap does not persist Action
+end note
+
+@enduml

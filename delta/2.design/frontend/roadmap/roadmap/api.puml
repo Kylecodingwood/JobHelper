@@ -1,0 +1,28 @@
+@startuml roadmap-api
+title Roadmap API — 对齐后端
+' 单数 /roadmap；preview → confirm
+
+actor User
+participant "RoadmapPageShell" as UI
+participant "GET /roadmap" as R
+participant "GET /roadmap/actionability" as A
+participant "POST .../preview" as P
+participant "POST .../confirm" as C
+
+User -> UI : open /roadmap
+UI -> R
+R --> UI : aggregate or 404
+UI -> A
+A --> UI : actionable strip
+
+User -> UI : generate / recompute
+UI -> P : preview
+P --> UI : previewToken
+User -> UI : confirm
+UI -> C : confirmPreview
+C --> UI : 201 / 200
+
+User -> UI : complete task
+UI -> UI : POST .../tasks/{id}/complete\n(+ dependencyOverride)
+
+@enduml

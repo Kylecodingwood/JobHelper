@@ -1,0 +1,88 @@
+@startuml
+title Job 发现、决策与归档流程
+skinparam shadowing false
+
+start
+if (每日调度或手动重跑?) then (是)
+  :创建独立 SourceRun;
+  fork
+    :调用 FreeHire 主源;
+  fork again
+    :按站点隔离调用 JobSpy;
+  end fork
+
+  if (403/429/captcha/超时/解析失败?) then (有)
+    :写入 SourceRun 结构化诊断;
+    :隔离失败站点或记录;
+  endif
+
+  :持久化有效 RawPosting;
+  :标准化字段;
+  :按 stable ID / 规范 URL 硬去重;
+  if (仅 fuzzy 相似?) then (是)
+    :标记可能重复，等待用户确认;
+    note right
+      确认时保留较早 CanonicalJob；
+      合并 RawPosting 引用；
+      状态冲突须用户选择。
+    end note
+  endif
+
+  :依据 Profile 时间线与预期入职日执行 Gate;
+  note right
+    预期入职日缺失 →
+    工作授权 NEEDS_CONFIRMATION；
+    语言对照 LanguageProficiency。
+  end note
+  if (任一 Gate 维度失败?) then (是)
+    :保留职位并默认隐藏;
+  else (否)
+    if (存在未知或待确认?) then (是)
+      :保留并标记 UNKNOWN / NEEDS_CONFIRMATION;
+    else (全部通过)
+      :五因素 POSITIVE/NEUTRAL/NEGATIVE 投票;
+      :≥3 POSITIVE 且 0 NEGATIVE → High;
+      :≥2 NEGATIVE → Low; 否则 Medium;
+      :生成 tier 与分项证据;
+    endif
+  endif
+  :新职位状态为 New;
+  :结束 SourceRun 并保存计数;
+else (用户保存 URL)
+  :校验并规范化 URL;
+  if (规范 URL 已存在?) then (是)
+    :关联既有 CanonicalJob;
+  else (否)
+    :保存用户输入 RawPosting;
+    :进入标准化、去重、Gate 与 Rank;
+  endif
+endif
+
+:用户查看 Inbox、来源和规则证据;
+if (覆盖 Gate?) then (是)
+  :要求填写非空原因;
+  :追加 JobDecision，保留原 Gate 证据;
+endif
+if (用户手动决定?) then (是)
+  :设置 New/Shortlisted/Ignored/Applied/Archived;
+  :发布变化供 Action 重算;
+endif
+
+:刷新来源与申请链接有效性;
+if (有明确关闭证据?) then (是)
+  :标记 EXPIRED 并归档/默认隐藏;
+  :保留 RawPosting、证据和决定;
+else (否)
+  if (检查错误或证据不足?) then (是)
+    :标记 UNKNOWN / NEEDS_CONFIRMATION;
+  else (仍开放)
+    :标记 ACTIVE;
+  endif
+endif
+stop
+
+note right
+  网络错误本身不能证明岗位过期；
+  系统不得自动 Shortlist 或提交申请。
+end note
+@enduml

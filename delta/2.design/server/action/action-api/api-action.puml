@@ -1,0 +1,40 @@
+@startuml
+title Action REST API (/api/v1)
+skinparam shadowing false
+
+package "Home /" {
+  [GET /home] as Home
+  note right of Home
+    actions + newJobs 分开展示
+    newJobs → Job API /jobs/new
+  end note
+}
+
+package "Actions" {
+  [GET /actions] as ListAct
+  [GET /actions/{id}] as GetAct
+  [GET /actions/{id}/priority-evidence] as PriEv
+  [POST /actions/{id}/decisions] as Decisions
+  [GET /actions/{id}/navigation] as Nav
+}
+
+package "Job API (external)" {
+  [GET /jobs/new] as NewJobs
+}
+
+Home --> ActionSummaryDto
+Home --> NewJobs : JobSummaryDto
+ListAct --> ActionSummaryDto
+GetAct --> ActionDetailDto
+PriEv --> PriorityExplanationDto
+Decisions --> ActionDetailDto
+
+note bottom of Decisions
+  PIN|UNPIN|COMPLETE|IGNORE|RESTORE
+  不修改 Job 源状态
+end note
+
+note bottom of PriEv
+  deadline → blocker → pin → suggestion
+end note
+@enduml

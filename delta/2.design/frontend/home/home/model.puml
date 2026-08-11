@@ -1,0 +1,67 @@
+@startuml home-model
+title Home 视图模型 (/)
+' Delta 链（文档）：model → component；为可预览，不内容 include 异构图
+hide circle
+skinparam classAttributeIconSize 0
+
+class HomePageViewModel {
+  actions: HomeActionCardVM[]
+  blockedActions: HomeActionCardVM[]
+  newJobs: HomeNewJobCardVM[]
+  degradedDomains: string[]
+  lastRefreshedAt: string
+  actionLimit: int
+}
+
+class HomeActionCardVM {
+  actionId: UUID
+  title: string
+  sourceDomain: string
+  status: string
+  pinned: boolean
+  priorityBand: string
+  primaryReasonSummary: string
+  version: int
+  canNavigate: boolean
+}
+
+class TargetRefVM {
+  type: string
+  id: UUID
+  route: string
+}
+
+class HomeActionPriorityVM {
+  calculationId: UUID
+  isStale: boolean
+}
+
+class PriorityEvidenceVM {
+  code: string
+  summary: string
+}
+
+class HomeNewJobCardVM {
+  jobId: UUID
+  title: string
+  rankTier: string
+  status: string
+}
+
+HomePageViewModel *-- HomeActionCardVM
+HomePageViewModel *-- HomeNewJobCardVM
+HomeActionCardVM --> TargetRefVM
+HomeActionCardVM ..> HomeActionPriorityVM : drawer load
+HomeActionPriorityVM *-- PriorityEvidenceVM
+
+note bottom of HomeActionCardVM
+  status: OPEN / BLOCKED / COMPLETED / IGNORED / STALE
+  no IN_PROGRESS; BLOCKED not in main actions[]
+end note
+
+note bottom of HomeNewJobCardVM
+  rankTier: HIGH / MEDIUM / LOW
+  status: NEW
+end note
+
+@enduml

@@ -1,0 +1,63 @@
+@startuml
+title Action 跨域事件消费（幂等 Receipt）
+skinparam shadowing false
+
+|infra Outbox|
+:投递 DomainEventEnvelope;
+
+|DomainEventConsumerService|
+:consume(envelope);
+
+if (receipt exists\n且 PROCESSED?) then (yes)
+  stop
+endif
+
+:INSERT receipt RECEIVED\nUNIQUE(consumer, sourceDomain, eventId);
+
+if (sourceObjectVersion\n< lastProcessed?) then (yes)
+  :receipt = IGNORED_STALE;
+  stop
+endif
+
+|ActionGenerationService|
+switch (eventType?)
+case (JOB_CREATED)
+  :create REVIEW_NEW_JOB\n+ GenerationEvidence;
+case (JOB_STATUS_CHANGED)
+  if (status != NEW?) then (yes)
+    :close REVIEW_NEW_JOB\nSOURCE_EVENT;
+  endif
+case (JOB_GATE_NEEDS_CONFIRMATION)
+  :upsert RESOLVE_GATE\nfocusKey=gate:dimension;
+case (JOB_DECISION_RECORDED)
+  :close RESOLVE_GATE / REVIEW_NEW_JOB;
+case (ROADMAP_TASK_ACTIONABLE)
+  :create COMPLETE_ROADMAP_TASK\ndeadline=dueAt?;
+case (ROADMAP_TASK_COMPLETED)
+  :close COMPLETE_ROADMAP_TASK;
+case (JOB_ARCHIVED / EXPIRED)
+  :mark STALE;
+endswitch
+
+|ActionPriorityService|
+:recalculate(affected actions)\ndeadline→blocker→pin→suggestion;
+
+|DomainEventConsumerService|
+:receipt = PROCESSED;
+
+|Home UI /|
+:GET /api/v1/home;
+
+stop
+
+note right
+  重复 eventId → no-op
+  失败 → FAILED 可重试
+  不撤销 pin/ignore/complete
+end note
+
+note left
+  Action 唯一拥有 Home 待办
+  New Jobs 读 Job /jobs/new
+end note
+@enduml

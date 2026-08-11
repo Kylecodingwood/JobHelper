@@ -1,0 +1,42 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Backend build
+jobAssitant/backend/target/
+jobAssitant/backend/.mvn/wrapper/maven-wrapper.jar
+
+# Frontend
+jobAssitant/frontend/node_modules/
+jobAssitant/frontend/dist/
+
+# Local runtime data — never commit (DB, CV uploads, backups)
+jobAssitant/backend/data/
+**/data/backups/
+**/data/cv/
+*.mv.db
+*.trace.db
+*.h2.db
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+credentials*.json
+**/application-local.yml
+**/application-local.yaml
+
+# Datasource scratch
+scripts/datasource/.venv/
+scripts/datasource/out/
+scripts/datasource/__pycache__/
+**/__pycache__/
+*.pyc
+
+# Misc local
+*.swp
+.cursor/

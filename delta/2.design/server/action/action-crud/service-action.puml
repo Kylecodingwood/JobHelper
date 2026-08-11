@@ -1,0 +1,68 @@
+@startuml
+title Action 域应用服务
+skinparam shadowing false
+
+package "action.application" {
+  class ActionQueryService {
+    +listHomeActions(query): List<ActionSummary>
+    +getAction(actionId): ActionDetail
+    +getPriorityEvidence(actionId): List<PriorityEvidence>
+    +resolveNavigation(actionId): NavigationTarget
+  }
+
+  class ActionCommandService {
+    +pin(actionId, version): ActionDetail
+    +unpin(actionId, version): ActionDetail
+    +complete(actionId, reason, version): ActionDetail
+    +ignore(actionId, reason, version): ActionDetail
+    +restore(actionId, version): ActionDetail
+  }
+
+  class ActionPriorityService {
+    +recalculate(actionId): void
+    +recalculateAll(): void
+    +buildSortKey(action, evidences): String
+  }
+
+  class ActionGenerationService {
+    +upsertFromEvent(event, receipt): void
+    +createAction(spec): ActionItem
+    +closeBySourceEvent(actionId, event): void
+    +markStale(actionId, reason): void
+  }
+
+  class ActionDependencyService {
+    +linkBlocker(blocked, blocking, reason): void
+    +resolveDependencies(actionId): void
+  }
+
+  class DomainEventConsumerService {
+    +consume(envelope): ConsumeResult
+    +recordReceipt(eventId, status): void
+    +isStaleVersion(targetId, version): boolean
+  }
+}
+
+DomainEventConsumerService --> ActionGenerationService
+ActionGenerationService --> ActionPriorityService
+ActionCommandService --> ActionPriorityService
+ActionCommandService --> ActionQueryService
+ActionDependencyService --> ActionGenerationService
+
+note bottom of ActionPriorityService
+  deadline → blocker → pin → suggestion
+  无 opaque 总分
+end note
+
+note bottom of ActionGenerationService
+  actionKind:
+  REVIEW_NEW_JOB, RESOLVE_GATE,
+  COMPLETE_ROADMAP_TASK, ...
+  禁止 AUTO_APPLY
+end note
+
+note right of DomainEventConsumerService
+  幂等 receipt
+  sourceDomain + eventId
+end note
+@enduml

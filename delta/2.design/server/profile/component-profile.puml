@@ -1,0 +1,46 @@
+@startuml
+title Profile 域组件（Server）
+skinparam componentStyle rectangle
+
+package "profile" {
+  component "profile-api\nREST /api/v1/profile*" as api
+  component "profile-crud\nApplication + Domain" as crud
+  component "profile-model\nJPA Entities" as model
+  component "profile-workflow-recompute\nRecomputeRequest FSM" as wf_recompute
+  component "profile-workflow-backup\nScheduler + Snapshot" as wf_backup
+}
+
+package "infra" {
+  component "domain-event-outbox\n(PROFILE_*)" as outbox
+  component "scheduler\nSun 03:00" as sched
+}
+
+package "external domains" {
+  component "roadmap\nRecomputePort / GeneratePort" as roadmap
+  component "job\nGate + Rank Port" as job
+  database "PostgreSQL" as db
+}
+
+api --> crud
+crud --> model
+crud --> wf_recompute
+crud --> outbox
+wf_recompute --> roadmap
+wf_recompute --> job
+wf_backup --> db
+wf_backup --> model
+sched --> wf_backup
+model --> db
+outbox --> roadmap : async optional
+
+note bottom of wf_recompute
+  预览确认后执行
+  ROADMAP 仅 merge 系统未完成 Task
+end note
+
+note bottom of wf_backup
+  全库快照
+  保留 4 份
+  恢复须 preview
+end note
+@enduml

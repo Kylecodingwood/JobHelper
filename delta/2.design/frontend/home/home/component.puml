@@ -1,0 +1,25 @@
+@startuml home-components
+title Home 组件 (/)
+' Delta 链（文档）：component → layout；为可预览，不内容 include 异构图
+
+component "HomeTopBar\nid: home-top-bar" as top
+component "HomeDegradedBanner\nid: home-degraded-banner" as banner
+component "HomeActionList" as alist {
+  component "HomeActionCard x N" as card
+  component "HomeActionDecisionMenu" as menu
+}
+component "HomeBlockedSummary\nid: home-blocked-summary" as blocked
+component "HomeEmptyState\nid: home-empty-state" as empty
+component "HomeNewJobList" as njlist {
+  component "HomeNewJobCard x N" as njcard
+}
+component "HomeActionPriorityDrawer\nid: home-action-priority-drawer" as drawer
+component "HomeActionDecisionDialog\nid: home-action-decision-dialog" as dialog
+
+top --> alist : refresh
+card --> drawer : why priority
+card --> menu : complete / ignore / pin
+menu --> dialog : confirm
+card ..> njcard : navigate jobs/roadmap
+
+@enduml

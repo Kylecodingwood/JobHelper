@@ -1,0 +1,62 @@
+@startuml jobs-inbox-components
+title Jobs Inbox 组件树 (/jobs)
+' Delta 链（文档）：component → layout；为可预览，不内容 include 异构图
+
+package "JobsPage" {
+  [JobsTopBar] as top
+  [JobsFilterBar] as filter
+  [JobsMainSplit] as split
+  [SaveUrlDialog] as saveDlg
+  [JobsPageTitle] as title
+  [JobsInboxCountBadge] as count
+  [SaveUrlButton] as saveBtn
+  [LinkToSourcesButton] as linkSrc
+}
+
+package "JobsListPane" {
+  [JobsVirtualList] as vlist
+  [JobListRow] as row
+  [JobsListEmptyState] as empty
+  [JobsListErrorState] as err
+}
+
+package "JobsDetailPane" {
+  [JobsDetailPlaceholder] as placeholder
+  [JobDetailSidebar] as sidebar
+  [JobDetailHeader] as header
+  [JobStatusActionBar] as statusBar
+  [GateEvidenceSection] as gateSec
+  [RankEvidenceSection] as rankSec
+  [JobSourcesSection] as srcSec
+  [JobDuplicatePanel] as dupPanel
+  [JobDecisionHistorySection] as histSec
+  [GateOverrideForm] as overrideForm
+  [DuplicateStatusConflictDialog] as conflictDlg
+}
+
+top --> title
+top --> count
+top --> saveBtn
+saveBtn ..> saveDlg : opens
+top --> linkSrc
+
+split --> vlist
+split --> sidebar
+vlist --> row
+vlist --> empty
+vlist --> err
+
+sidebar --> header
+sidebar --> statusBar
+sidebar --> gateSec
+sidebar --> rankSec
+sidebar --> srcSec
+sidebar --> dupPanel
+sidebar --> histSec
+sidebar --> overrideForm
+dupPanel ..> conflictDlg : on status conflict
+
+filter ..> vlist : filters query
+row ..> sidebar : select jobId
+
+@enduml

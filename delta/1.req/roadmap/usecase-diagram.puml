@@ -1,0 +1,62 @@
+@startuml
+title Roadmap 用例图
+left to right direction
+
+actor "求职者" as User
+actor "模板维护者" as Maintainer
+actor "CV / Job / Behavioral 域" as Domain
+
+rectangle "Roadmap Domain" {
+  usecase "UC-RDM-001\n管理 Roadmap Template" as UC1
+  usecase "UC-RDM-002\n生成基线 Roadmap" as UC2
+  usecase "UC-RDM-003\n管理 Roadmap Task" as UC3
+  usecase "UC-RDM-004\n覆盖未满足依赖" as UC4
+  usecase "UC-RDM-005\n追加领域事件任务" as UC5
+  usecase "UC-RDM-006\n查看可执行性\n并触发 Action 事件" as UC6
+  usecase "UC-RDM-007\n应用系统模板更新" as UC7
+  usecase "预览 Markdown" as Preview
+  usecase "校验依赖 DAG" as ValidateDag
+  usecase "预览生成/重算" as GenPreview
+}
+
+rectangle "Action Domain" <<external>> {
+  usecase "UC-ACT-001\n查看优先 Action" as ACT1
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC6
+User --> UC7
+User ..> ACT1 : 导航至 Home
+Maintainer --> UC1
+Domain --> UC5
+
+UC1 .> Preview : <<include>>
+UC2 .> ValidateDag : <<include>>
+UC2 .> GenPreview : <<include>>
+UC3 .> ValidateDag : <<include>>
+UC4 .> UC3 : <<extend>>
+UC2 .> UC6 : <<include>>
+UC3 .> UC6 : <<include>>
+UC5 .> UC6 : <<include>>
+UC7 .> UC6 : <<include>>
+UC6 ..> ACT1 : 发布事件
+
+note right of UC2
+  Profile + RoadmapTemplate
+  + 相对锚点 + 规则 v1
+  预览 → 用户确认 → 生成
+end note
+
+note bottom of UC7
+  保护用户编辑、完成、
+  归档及用户模板内容。
+end note
+
+note bottom of UC6
+  Roadmap 不拥有 Action；
+  仅发布可执行性事件。
+end note
+@enduml

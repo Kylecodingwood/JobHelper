@@ -1,0 +1,250 @@
+@startuml
+title Job 域持久化模型（PostgreSQL）
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+enum AdapterType {
+  FREEHIRE_API
+  JOBSPY
+  MANUAL
+}
+enum SourceRole {
+  PRIMARY
+  SUPPLEMENTAL
+  MANUAL
+}
+enum TriggerType {
+  SCHEDULED
+  MANUAL
+  RETRY
+}
+enum RunStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  PARTIAL_SUCCESS
+  FAILED
+  CANCELLED
+}
+enum ErrorCategory {
+  HTTP_403
+  HTTP_429
+  CAPTCHA
+  TIMEOUT
+  PARSE
+  VALIDATION
+  OTHER
+}
+enum ParseStatus {
+  PENDING
+  VALID
+  INVALID
+}
+enum Seniority {
+  INTERN
+  GRADUATE
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  STAFF
+  PRINCIPAL
+  MANAGER
+  UNKNOWN
+}
+enum GateStatus {
+  PASSED
+  FAILED
+  NEEDS_CONFIRMATION
+  UNKNOWN
+}
+enum RankTier {
+  HIGH
+  MEDIUM
+  LOW
+  UNRANKED
+}
+enum JobStatus {
+  NEW
+  SHORTLISTED
+  IGNORED
+  APPLIED
+  ARCHIVED
+}
+enum ValidityStatus {
+  ACTIVE
+  EXPIRED
+  NEEDS_CONFIRMATION
+  UNKNOWN
+}
+enum EvaluationType {
+  GATE
+  RANK
+  VALIDITY
+  DEDUPE
+}
+enum GateDimension {
+  LOCATION
+  WORK_AUTH
+  SENIORITY
+  LANGUAGE
+}
+enum RankDimension {
+  TARGET_ROLE
+  SKILL
+  FRESHNESS
+  LOCATION_FIT
+  GROWTH
+}
+enum EvidenceOutcome {
+  PASS
+  FAIL
+  NEEDS_CONFIRMATION
+  UNKNOWN
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+enum DecisionType {
+  STATUS_CHANGE
+  GATE_OVERRIDE
+  DUPLICATE_CONFIRMATION
+  DUPLICATE_REJECTION
+}
+enum DuplicateStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+}
+
+class job_source <<table>> {
+  +source_id: UUID <<PK>>
+  +code: VARCHAR <<UK>>
+  +adapter_type: AdapterType
+  +site: VARCHAR?
+  +role: SourceRole
+  +enabled: BOOLEAN
+  +schedule: VARCHAR
+  +search_terms: TEXT[]
+  +risk_note: TEXT?
+  +config_version: VARCHAR
+}
+
+class job_source_run <<table>> {
+  +source_run_id: UUID <<PK>>
+  +source_id: UUID <<FK>>
+  +trigger_type: TriggerType
+  +status: RunStatus
+  +parameters_snapshot: JSONB
+  +request_count: INT
+  +received_count: INT
+  +valid_count: INT
+  +created_count: INT
+  +updated_count: INT
+  +failed_count: INT
+  +duration_ms: INT?
+}
+
+class job_source_diagnostic <<table>> {
+  +diagnostic_id: UUID <<PK>>
+  +source_run_id: UUID <<FK>>
+  +category: ErrorCategory
+  +site: VARCHAR?
+  +message: TEXT
+  +retry_count: INT
+  +occurred_at: TIMESTAMPTZ
+}
+
+class job_raw_posting <<table>> {
+  +raw_posting_id: UUID <<PK>>
+  +source_id: UUID <<FK>>
+  +source_run_id: UUID <<FK>>
+  +source_stable_id: VARCHAR?
+  +canonical_url: TEXT?
+  +raw_payload: JSONB
+  +user_provided_jd: TEXT?
+  +parse_status: ParseStatus
+  +fetched_at: TIMESTAMPTZ
+}
+
+class job_canonical <<table>> {
+  +job_id: UUID <<PK>>
+  +title: TEXT?
+  +company: TEXT?
+  +location: TEXT?
+  +expected_start_date: DATE?
+  +seniority: Seniority
+  +gate_status: GateStatus
+  +rank_tier: RankTier
+  +job_status: JobStatus
+  +validity_status: ValidityStatus
+  +hidden_by_default: BOOLEAN
+  +canonical_apply_url: TEXT?
+  +rule_version: VARCHAR
+  +version: INT
+}
+
+class job_source_ref <<table>> {
+  +job_source_ref_id: UUID <<PK>>
+  +job_id: UUID <<FK>>
+  +raw_posting_id: UUID <<FK,UK>>
+  +is_preferred: BOOLEAN
+}
+
+class job_rule_evidence <<table>> {
+  +evidence_id: UUID <<PK>>
+  +job_id: UUID <<FK>>
+  +evaluation_type: EvaluationType
+  +dimension: VARCHAR
+  +outcome: EvidenceOutcome
+  +rule_id: VARCHAR
+  +rule_version: VARCHAR
+  +evaluated_at: TIMESTAMPTZ
+}
+
+class job_decision <<table>> {
+  +decision_id: UUID <<PK>>
+  +job_id: UUID <<FK>>
+  +decision_type: DecisionType
+  +from_value: VARCHAR?
+  +to_value: VARCHAR?
+  +reason: TEXT?
+  +based_on_job_version: INT
+}
+
+class job_possible_duplicate <<table>> {
+  +duplicate_id: UUID <<PK>>
+  +left_job_id: UUID <<FK>>
+  +right_job_id: UUID <<FK>>
+  +signals: JSONB
+  +status: DuplicateStatus
+}
+
+job_source "1" *-- "0..*" job_source_run
+job_source_run "1" *-- "0..*" job_source_diagnostic
+job_source_run "1" *-- "0..*" job_raw_posting
+job_canonical "1" *-- "1..*" job_source_ref
+job_source_ref "*" --> "1" job_raw_posting
+job_canonical "1" *-- "0..*" job_rule_evidence
+job_canonical "1" *-- "0..*" job_decision
+job_possible_duplicate "*" --> "2" job_canonical
+
+note right of job_canonical
+  expected_start_date 缺失
+  → WORK_AUTH Gate
+     NEEDS_CONFIRMATION
+  禁止自动 +90d/毕业日
+end note
+
+note bottom of job_possible_duplicate
+  CONFIRMED：较早 first_seen 为 survivor
+  冲突 job_status 须用户选择
+end note
+
+note bottom of job_rule_evidence
+  Rank 五因素各一行证据
+  ≥3 POS & 0 NEG → HIGH
+  ≥2 NEG → LOW；否则 MEDIUM
+end note
+@enduml

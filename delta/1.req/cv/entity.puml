@@ -1,0 +1,131 @@
+@startuml
+title CV 领域逻辑实体图
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class CVDocument <<AggregateRoot>> {
+  documentId
+  originalFileRef
+  mediaType
+  fileHash
+  createdAt
+}
+
+class CVVersion {
+  versionId
+  parentVersionId
+  versionNumber
+  extractedText
+  confirmedText
+  extractionStatus
+  versionStatus
+  textSource
+  createdAt
+  confirmedAt
+}
+
+class CVReview {
+  reviewId
+  reviewType
+  jobId
+  jobDescriptionSnapshotRef
+  ruleVersion
+  promptVersion
+  status
+  createdAt
+}
+
+class CVSuggestion {
+  suggestionId
+  targetText
+  targetLocation
+  issue
+  rationale
+  proposedText
+  origin
+  factCheckStatus
+  decision
+  decidedAt
+}
+
+class AppliedSuggestion {
+  versionId
+  suggestionId
+  appliedOrder
+}
+
+class AIConsent <<GlobalRegistryProjection>> {
+  consentId
+  dataCategory
+  scopeVersion
+  status
+  grantedAt
+  revokedAt
+}
+
+class AIInvocation {
+  invocationId
+  provider
+  model
+  inputVersionRefs
+  promptVersion
+  cacheKey
+  cacheStatus
+  costMetadata
+  outputRef
+  status
+}
+
+class SensitiveDeletionAudit {
+  auditId
+  eventType
+  opaqueObjectToken
+  deletedCounts
+  result
+  occurredAt
+}
+
+enum ReviewType {
+  GENERIC_HEALTH
+  TAILORED_TO_JOB
+}
+
+enum SuggestionDecision {
+  UNDECIDED
+  ACCEPTED
+  REJECTED
+  DEFERRED
+}
+
+CVDocument "1" *-- "1..*" CVVersion : 拥有
+CVVersion "0..1 父" <-- "0..* 子" CVVersion : 派生
+CVVersion "1 输入" <-- "0..*" CVReview : 固定引用
+CVReview "1" *-- "0..*" CVSuggestion : 产生
+CVVersion "1 派生版本" -- "0..*" AppliedSuggestion
+CVSuggestion "1" -- "0..1" AppliedSuggestion
+CVReview "1" *-- "0..*" AIInvocation : 执行/重试
+AIConsent ..> AIInvocation : 全局注册表按类别授权
+CVReview ..> ReviewType
+CVSuggestion ..> SuggestionDecision
+
+note right of CVVersion
+CONFIRMED 后不可原地修改；
+派生必须创建新版本
+end note
+
+note bottom of CVSuggestion
+FACT_CONFLICT 不可接受；
+决定只能由用户作出
+end note
+
+note bottom of AIConsent
+全局 ai-consent.md 的域内投影；
+非独立长期副本
+end note
+
+note bottom of SensitiveDeletionAudit
+删除后唯一保留记录；
+不得含文件名、正文、提示或输出
+end note
+@enduml

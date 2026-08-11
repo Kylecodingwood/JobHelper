@@ -1,0 +1,60 @@
+@startuml
+title Profile 影响重算工作流（WF-PRO-001）
+|Profile 域|
+start
+:加载 Profile / 编辑;
+:校验字段与时间线;
+if (校验通过?) then (否)
+  :返回字段错误;
+  stop
+endif
+:影响分析\n(Roadmap/Gate/Rank);
+:展示 diff 与 impactSummary;
+if (用户确认保存?) then (否)
+  stop
+endif
+:原子保存 profileVersion+1;
+:写 Outbox PROFILE_* 事件;
+if (存在派生影响?) then (否)
+  stop
+endif
+:创建 PENDING RecomputeRequest;
+|用户 / API|
+:选择 scopes;
+if (含 ROADMAP?) then (是)
+  :RoadmapRecomputePort.buildPreview\n(锚点+待 merge 任务);
+  :展示预览\nprotected / willNotOverwrite;
+endif
+if (用户选择?) then (推迟)
+  :status = DEFERRED;
+  stop
+elseif (取消) then
+  stop
+else (确认执行)
+endif
+if (profileVersion 仍为当前?) then (否)
+  :status = SUPERSEDED;
+  stop
+endif
+:status = RUNNING;
+partition "分 scope 执行" {
+  if (ROADMAP?) then (是)
+    :confirmMerge(previewToken)\n仅 SYSTEM 未完成 Task;
+  endif
+  if (JOB_GATE?) then (是)
+    :JobGateRecomputePort;
+  endif
+  if (JOB_RANK?) then (是)
+    :JobRankRecomputePort;
+  endif
+}
+if (全部成功?) then (是)
+  :COMPLETED;
+elseif (部分成功?) then (是)
+  :PARTIALLY_FAILED;
+else (否)
+  :FAILED;
+endif
+:返回 resultSummary\n不覆盖 JobDecision / 用户 Roadmap 决定;
+stop
+@enduml

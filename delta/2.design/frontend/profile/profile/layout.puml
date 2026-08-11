@@ -1,0 +1,45 @@
+@startuml profile-layout
+title Profile 布局 (/profile)
+
+skinparam rectangle {
+  BorderColor #333
+  BackgroundColor #FAFAFA
+}
+
+rectangle "ProfilePageShell" as shell {
+  rectangle "ProfileTopBar\n48px" as top #E8EEF4
+
+  together {
+    rectangle "Edit Mode: ProfileMainSplit" as split {
+      rectangle "ProfileFormColumn\n~65%" as form {
+        rectangle "ProfileSectionEducation" as edu
+        rectangle "ProfileSectionWorkAuth" as wa
+        rectangle "ProfileSectionTargetRole" as tr
+        rectangle "ProfileSectionLanguageProficiency" as lang
+        rectangle "ProfileSectionSkills" as sk
+        rectangle "ProfileSectionExperience" as ex
+      }
+      rectangle "ProfileSideColumn\n~35%" as side {
+        rectangle "ProfileRecomputePanel" as rec #EEF2E6
+        rectangle "ProfileDataManagementPanel" as data #F5F5F5
+      }
+    }
+  }
+
+  rectangle "Onboarding Mode\nProfileOnboardingWizard\nmax 640px" as onboard #FFFFFF {
+    rectangle "ProfileStepIndicator" as steps
+    rectangle "ProfileStepContent" as step
+  }
+}
+
+note bottom of lang
+  LanguageProficiency 实体
+  Gate 语言维度
+end note
+
+note bottom of data
+  备份 Sun 03:00
+  保留 4 份
+end note
+
+@enduml

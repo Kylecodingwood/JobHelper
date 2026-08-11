@@ -1,0 +1,148 @@
+# API 契约冻结（Pivot 2026-08-09）
+
+| 项 | 内容 |
+|---|---|
+| 冻结日 | 2026-08-09；增补 **CV 文件管理** + **Behavioral 完整本地域**（AI Port 未实现） |
+| 真相源 | 本文件 + 下列 `2.design` api/model |
+| 前版 | 系统模板 / GRS / Profile→Roadmap 重算 / TargetRole→searchTerms **已废止** |
+
+## 对齐规则
+
+1. Roadmap：**独立待办**，不依赖 Profile；CRUD + checkbox 完成  
+2. Profile：**用户画像**（后续 AI prompt 基座）；无 TargetRole；身份含原 Work Auth  
+3. Sources：搜索词**仅**用户在 Source 上填写；首次同步前必填  
+4. Home：`GET /home` 默认 `actionLimit=3`；其余折叠展开  
+5. 资源名：`/job-sources`、`/job-source-runs`；Roadmap 单数 `/roadmap`  
+6. **CV**：PDF / DOCX 原样上传；DOCX 前端渲染预览；`/file` 打开原文件；无抽文本、无 Review   
+7. **Behavioral**：题库 + STAR Evidence + 答案版本 + 本地反馈；AI 仅 Port，默认 `AI_NOT_ENABLED`
+
+---
+
+## Roadmap
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[] }`（默认打开 todolist 夹） |
+| GET | `/api/v1/roadmap/folders` | `{ folders[] }` |
+| POST | `/api/v1/roadmap/folders` | `{ name, kind? }` → 201；`kind`: `todolist`（默认）\|`companytracker` |
+| PATCH | `/api/v1/roadmap/folders/{folderId}` | `{ name }` 重命名（不可改 kind） |
+| DELETE | `/api/v1/roadmap/folders/{folderId}` | 204；不可删最后一个；级联删内容 |
+| POST | `/api/v1/roadmap/todos` | `{ name, folderId?, dueAt?, comment? }` → 201（仅 todolist） |
+| PATCH | `/api/v1/roadmap/todos/{todoId}` | 改 name/dueAt/comment/done/folderId |
+| DELETE | `/api/v1/roadmap/todos/{todoId}` | 204 |
+| POST | `/api/v1/roadmap/todos/{todoId}/toggle` | checkbox 翻转 done |
+| POST | `/api/v1/roadmap/companies` | `{ companyName, folderId?, status?, contact?, note? }` → 201（仅 companytracker） |
+| PATCH | `/api/v1/roadmap/companies/{companyId}` | 改 companyName/status/contact/note/folderId |
+| DELETE | `/api/v1/roadmap/companies/{companyId}` | 204 |
+
+**FolderDto**：`folderId`, `name`, `kind`, `itemCount`, `sortOrder`, `updatedAt`
+
+**TodoDto**：`todoId`, `folderId`, `name`, `dueAt`, `comment`, `done`, `sortOrder`, `updatedAt`
+
+**CompanyDto**：`companyId`, `folderId`, `companyName`, `status`, `contact`, `note`, `sortOrder`, `updatedAt`
+
+**Company status**：`watching` \| `applied` \| `interview` \| `offer` \| `rejected` \| `on_hold`
+
+**已删除端点**：`generate/*`、`recompute/*`、`templates/*`、`template-updates/*`、`tasks/*`、`actionability`
+
+---
+
+## Profile
+
+| 方法 | 路径 |
+|---|---|
+| GET/PUT | `/api/v1/profile` |
+| POST | `/api/v1/profile/validate` |
+| GET | `/api/v1/profile/field-usage` |
+| GET/POST | `/api/v1/profile/backups`…（导出/预览/恢复保留） |
+
+**PUT body（摘要）**
+
+```json
+{
+  "expectedProfileVersion": 3,
+  "nationality": "CN",
+  "identityStatus": "Stamp 1G",
+  "identityValidUntil": "2027-03-01",
+  "targetCountry": "IE",
+  "jobSeekingGoal": "Graduate backend roles in Dublin",
+  "educationPeriods": [{ "institutionName": "…", "programmeName": "…", "startDate": null, "expectedGraduationDate": null, "countryCode": "IE", "isPrimary": true }],
+  "workExperiences": [{ "company": "…", "title": "…", "startDate": null, "endDate": null, "summary": "…" }],
+  "skills": ["Java", "SQL"],
+  "languageProficiencies": [{ "languageCode": "en", "proficiency": "B2" }, { "languageCode": "zh", "proficiency": "NATIVE" }]
+}
+```
+
+**已删除**：`targetRoles`、`workAuthorizations`、`/recompute-requests/*`
+
+Gate 读 `identityStatus` + `identityValidUntil` + languages（不再读 TargetRole）。
+
+---
+
+## Sources / Sync
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/job-sources` | 列表；每项 `searchTerms` 为**全局同一份**（只读展示） |
+| GET | `/api/v1/job-sources/search-terms` | `{ searchTerms: string[] }` |
+| PUT | `/api/v1/job-sources/search-terms` | `{ searchTerms: string[] }` → 全局写入，**所有源同步共用** |
+| PATCH | `/api/v1/job-sources/{id}` | `{ enabled? }`；若带 `searchTerms` 则写入全局（兼容旧客户端） |
+| POST | `/api/v1/job-source-runs` | `{ sourceId }`；FreeHire= facet 矩阵+分页；JobSpy= junior 扩展词；全局 `searchTerms` 空 → **400 `SEARCH_TERMS_REQUIRED`** |
+
+`JobSourceDto.searchTerms` = 全局用户自管词；**无** per-source 覆盖 / Profile 合并。  
+调度同步使用全局 `searchTerms`；仍空则跳过并记 diagnostic。
+
+---
+
+## Home
+
+| 方法 | 路径 |
+|---|---|
+| GET | `/api/v1/home?actionLimit=3&newJobLimit=10` | 默认 **actionLimit=3**；进入时刷新「今日优先」三槽 |
+| GET | `/api/v1/actions` | 展开时分页拉更多 |
+
+**今日优先三槽**（`priorityRuleVersion=today-priority-v1`）：
+1. 岗位动作：`REVIEW_TODAY_JOBS`（NEW 待审摘要）
+2. 投递闭环：`ADVANCE_TODAY_TODO` / `ADVANCE_SHORTLIST`
+3. 材料/公司：`FOLLOW_COMPANY` / `UPLOAD_CV` / CompanyTracker 引导
+
+旧 Roadmap 模板 Action（`COMPLETE_ROADMAP_TASK`）进入 Home 时会被 supersede，不再占满前三。
+
+响应可含 `actions.hasMore`（total > limit 时 true）。
+
+---
+
+## 前端调用策略
+
+| 页 | 策略 |
+|---|---|
+| Home | `/home`；折叠其余，展开再 `GET /actions` 或提高 limit |
+| Roadmap | 左文件夹（todolist / companytracker）/ 右对应表；夹可改名 |
+| Profile | PUT 兼创建；无重算面板 |
+| Sources | 大搜索框写**全局** `PUT /job-sources/search-terms`；再按源手动/定时 run |
+| CV | 列表 + multipart 上传 PDF/DOCX；预览打 PDF URL |
+| Behavioral | Questions / Evidence / Practice 三区；反馈走本地规则 |
+
+---
+
+## CV
+
+| 方法 | 路径 |
+|---|---|
+| GET | `/api/v1/cv/documents` |
+| POST | `/api/v1/cv/documents` | multipart `file`（PDF 或 DOCX） |
+| GET | `/api/v1/cv/documents/{id}` |
+| GET | `/api/v1/cv/documents/{id}/pdf` | `application/pdf`（仅 PDF 文档） |
+| GET | `/api/v1/cv/documents/{id}/file` | 原文件：PDF `inline`，DOCX `attachment` |
+| DELETE | `/api/v1/cv/documents/{id}` | 204 |
+
+## Behavioral
+
+| 方法 | 路径 |
+|---|---|
+| GET/POST/PATCH/DELETE | `/api/v1/behavioral/questions`… |
+| GET/POST/PUT/DELETE | `/api/v1/behavioral/evidence`… |
+| GET/POST | `/api/v1/behavioral/answers`… + `/versions` |
+| POST | `.../versions/{versionId}/feedback` | 本地 `bhv-local-v1` |
+| POST | `.../feedback/{id}/items/{itemId}/decision` |
+| POST | `.../feedback/ai` | **501 `AI_NOT_ENABLED`** |

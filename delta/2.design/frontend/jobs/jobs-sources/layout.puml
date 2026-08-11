@@ -1,0 +1,41 @@
+@startuml jobs-sources-layout
+title Jobs Sources 布局 (/jobs/sources)
+
+skinparam rectangle {
+  BorderColor #333
+  BackgroundColor #FAFAFA
+}
+
+rectangle "SourcesPageShell" as shell {
+  rectangle "SourcesTopBar\n48px\nback / manual sync / refresh" as top #E8EEF4
+  rectangle "SourcesSummaryStrip\n72-96px\nSource cards horizontal" as summary #EEF2E6
+  rectangle "SourcesFilterBar\n40px" as filter #F0F0F0
+  rectangle "SourcesMainSplit" as split {
+    rectangle "SourceRunListPane\n~45%\nrun timeline rows 56px" as runList #FFFFFF
+    rectangle "SourceRunDetailPane\n~55%" as runDetail #F5F5F5 {
+      rectangle "RunHeader" as rh
+      rectangle "RunMetricsGrid" as metrics
+      rectangle "ParametersSnapshotPanel" as params
+      rectangle "DiagnosticsTable\ngroup by site x category" as diag
+      rectangle "RunActionsBar" as actions
+    }
+  }
+}
+
+top -[hidden]down- summary
+summary -[hidden]down- filter
+filter -[hidden]down- split
+runList -[hidden]right- runDetail
+
+note right of summary
+  FreeHire PRIMARY
+  JobSpy sites toggles
+  searchTerms summary
+end note
+
+note bottom of diag
+  403/429/CAPTCHA/TIMEOUT/PARSE
+  脱敏消息，无完整响应正文
+end note
+
+@enduml

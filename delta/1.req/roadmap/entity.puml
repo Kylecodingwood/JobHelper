@@ -1,0 +1,146 @@
+@startuml
+title Roadmap 实体图
+hide methods
+skinparam classAttributeIconSize 0
+
+class RoadmapTemplate {
+  +templateId: UUID
+  +name: String
+  +templateType: TemplateType
+  +activeVersionId: UUID
+}
+
+class RoadmapTemplateVersion {
+  +templateVersionId: UUID
+  +version: String
+  +markdownContent: Text
+  +contentHash: String
+  +sourceUrl: URL
+  +licenseMetadata: String
+  +sourceUpdatedAt: DateTime
+}
+
+class TemplateTaskDefinition {
+  +templateTaskDefinitionId: UUID
+  +templateTaskKey: String
+  +title: String
+  +anchorType: AnchorType
+  +relativeOffset: Duration
+  +completionCriteria: Text
+  +defaultPriority: TaskPriority
+}
+
+class Roadmap {
+  +roadmapId: UUID
+  +status: RoadmapStatus
+  +profileVersion: Integer
+  +ruleVersion: String
+}
+
+class RoadmapTask {
+  +taskId: UUID
+  +logicalTaskKey: String
+  +title: String
+  +status: TaskStatus
+  +actionability: TaskActionability
+  +dueAt: DateTime
+  +completionCriteria: Text
+  +origin: TaskOrigin
+  +priority: TaskPriority
+  +userPinned: Boolean
+  +userEdited: Boolean
+}
+
+class TaskDependency {
+  +taskDependencyId: UUID
+  +predecessorTaskId: UUID
+  +successorTaskId: UUID
+}
+
+class DependencyOverride {
+  +dependencyOverrideId: UUID
+  +reason: Text
+  +createdAt: DateTime
+}
+
+class GenerationRecord {
+  +generationRecordId: UUID
+  +inputHash: String
+  +anchorSnapshot: JSON
+  +status: GenerationStatus
+}
+
+class TemplateApplication {
+  +templateApplicationId: UUID
+  +fromVersionId: UUID
+  +toVersionId: UUID
+  +status: TemplateApplicationStatus
+}
+
+class DomainEventReceipt {
+  +domainEventReceiptId: UUID
+  +sourceDomain: SourceDomain
+  +eventId: String
+  +sourceObjectId: String
+}
+
+enum TemplateType {
+  SYSTEM
+  USER
+}
+
+enum AnchorType {
+  COURSE_START
+  GRADUATE_RECRUITMENT_SEASON
+  GRADUATION
+  STAMP_EXPIRY
+  NONE
+}
+
+enum TaskOrigin {
+  SYSTEM_TEMPLATE
+  USER_TEMPLATE
+  USER_CREATED
+  CV_EVENT
+  JOB_EVENT
+  BEHAVIORAL_EVENT
+}
+
+enum SourceDomain {
+  CV
+  JOB
+  BEHAVIORAL
+}
+
+RoadmapTemplate "1" *-- "1..*" RoadmapTemplateVersion
+RoadmapTemplate --> TemplateType
+RoadmapTemplateVersion "1" *-- "1..*" TemplateTaskDefinition
+TemplateTaskDefinition --> AnchorType
+Roadmap "1" *-- "1..*" RoadmapTask
+Roadmap "1" *-- "0..*" TaskDependency
+Roadmap "1" *-- "1..*" GenerationRecord
+Roadmap "1" *-- "0..*" TemplateApplication
+Roadmap "1" *-- "0..*" DomainEventReceipt
+TaskDependency --> RoadmapTask : predecessor
+TaskDependency --> RoadmapTask : successor
+RoadmapTask "1" *-- "0..1" DependencyOverride
+RoadmapTask --> TaskOrigin
+DomainEventReceipt --> SourceDomain
+
+note bottom of RoadmapTemplateVersion
+  发布后不可变；
+  SYSTEM 必须保留 URL、license、更新时间。
+  语法见 markdown-template-spec.md
+end note
+
+note bottom of RoadmapTask
+  用户编辑、完成、归档
+  不得被模板更新覆盖。
+  Action 由 Action 域拥有。
+end note
+
+note bottom of Roadmap
+  发布任务/可执行性事件
+  供 Action 域消费
+end note
+@enduml

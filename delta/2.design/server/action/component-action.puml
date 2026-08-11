@@ -1,0 +1,32 @@
+@startuml
+title Action 域组件依赖
+skinparam componentStyle rectangle
+
+component "action-api\nREST /api/v1/home\n/actions" as api
+component "action-crud\n查询/命令/优先级" as crud
+component "action-model\nPostgreSQL" as model
+
+component "action-workflow-event-consume\n幂等 Receipt" as consume
+
+component "job-api\n/jobs/new" as jobapi <<external>>
+component "infra\nOutbox 投递" as infra <<external>>
+component "job / roadmap / cv / behavioral\n领域事件发布" as domains <<external>>
+
+api --> crud
+crud --> model
+consume --> crud
+infra ..> consume : DomainEventEnvelope
+domains ..> infra : publish
+api ..> jobapi : Home newJobs 投影
+
+note bottom of consume
+  consumer + sourceDomain + eventId
+  IGNORED_STALE 不回滚
+  Action owns Home Actions
+end note
+
+note bottom of crud
+  priority: deadline → blocker
+  → pin → suggestion
+end note
+@enduml

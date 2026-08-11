@@ -1,0 +1,51 @@
+@startuml jobs-sources-components
+title Jobs Sources 组件树 (/jobs/sources)
+' Delta 链（文档）：component → layout；为可预览，不内容 include 异构图
+
+package "SourcesPage" {
+  [SourcesTopBar] as top
+  [SourcesSummaryStrip] as summary
+  [SourcesFilterBar] as filter
+  [SourcesMainSplit] as split
+  [ManualRerunDialog] as rerunDlg
+  [BackToJobsLink] as back
+  [ManualSyncButton] as syncBtn
+}
+
+package "SourcesSummaryStrip" {
+  [SourceCard] as srcCard
+  [SourceEnabledToggle] as toggle
+}
+
+package "SourceRunListPane" {
+  [SourceRunList] as runList
+  [SourceRunRow] as runRow
+}
+
+package "SourceRunDetailPane" {
+  [SourceRunDetail] as detail
+  [RunMetricsGrid] as metrics
+  [ParametersSnapshotPanel] as params
+  [DiagnosticsTable] as diagTable
+  [RunActionsBar] as actions
+}
+
+top --> back
+top --> syncBtn
+syncBtn ..> rerunDlg : opens
+summary --> srcCard
+srcCard --> toggle
+
+split --> runList
+split --> detail
+runList --> runRow
+runRow ..> detail : sourceRunId
+
+detail --> metrics
+detail --> params
+detail --> diagTable
+detail --> actions
+
+filter ..> runList : filters
+
+@enduml

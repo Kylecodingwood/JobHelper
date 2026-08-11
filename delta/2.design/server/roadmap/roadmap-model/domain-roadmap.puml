@@ -1,0 +1,140 @@
+@startuml
+title Roadmap 域模型（Server / PostgreSQL）
+hide methods
+skinparam classAttributeIconSize 0
+
+class RoadmapTemplate {
+  +templateId: UUID
+  +name: String
+  +templateType: TemplateType
+  +activeVersionId: UUID
+}
+
+class RoadmapTemplateVersion {
+  +templateVersionId: UUID
+  +version: String
+  +markdownContent: Text
+  +contentHash: String
+  +sourceUrl: URL?
+  +licenseMetadata: String?
+  +sourceUpdatedAt: DateTime?
+}
+
+class TemplateTaskDefinition {
+  +templateTaskDefinitionId: UUID
+  +templateTaskKey: String
+  +title: String
+  +phase: String
+  +anchorType: AnchorType
+  +relativeOffset: Duration
+  +completionCriteria: Text
+  +defaultPriority: TaskPriority
+  +dependsOnKeys: String[]
+}
+
+class Roadmap {
+  +roadmapId: UUID
+  +status: RoadmapStatus
+  +profileVersion: Integer
+  +ruleVersion: String
+}
+
+class RoadmapTask {
+  +taskId: UUID
+  +logicalTaskKey: String?
+  +title: String
+  +status: TaskStatus
+  +actionability: TaskActionability
+  +dueAt: DateTime?
+  +origin: TaskOrigin
+  +priority: TaskPriority
+  +userPinned: Boolean
+  +userEdited: Boolean
+}
+
+class TaskDependency {
+  +predecessorTaskId: UUID
+  +successorTaskId: UUID
+  +dependencyType: DependencyType
+}
+
+class DependencyOverride {
+  +dependencyOverrideId: UUID
+  +unmetDependencyIds: UUID[]
+  +reason: Text
+}
+
+class GenerationRecord {
+  +generationRecordId: UUID
+  +inputHash: String
+  +anchorSnapshot: JSON
+  +status: GenerationStatus
+}
+
+class TemplateApplication {
+  +templateApplicationId: UUID
+  +fromVersionId: UUID
+  +toVersionId: UUID
+  +status: TemplateApplicationStatus
+}
+
+class DomainEventReceipt {
+  +sourceDomain: SourceDomain
+  +eventId: String
+  +resultTaskId: UUID?
+  +status: ReceiptStatus
+}
+
+class DomainEventOutbox {
+  +eventType: String
+  +payload: String
+}
+
+enum TemplateType {
+  SYSTEM_TEMPLATE
+  USER_TEMPLATE
+}
+enum AnchorType {
+  COURSE_START
+  GRADUATE_RECRUITMENT_SEASON
+  GRADUATION
+  STAMP_EXPIRY
+  NONE
+}
+enum TaskOrigin {
+  SYSTEM_TEMPLATE
+  USER_TEMPLATE
+  USER_CREATED
+  CV_EVENT
+  JOB_EVENT
+  BEHAVIORAL_EVENT
+}
+enum SourceDomain {
+  CV
+  JOB
+  BEHAVIORAL
+}
+
+RoadmapTemplate "1" *-- "1..*" RoadmapTemplateVersion
+RoadmapTemplateVersion "1" *-- "1..*" TemplateTaskDefinition
+Roadmap "1" *-- "1..*" RoadmapTask
+Roadmap "1" *-- "0..*" TaskDependency
+Roadmap "1" *-- "1..*" GenerationRecord
+Roadmap "1" *-- "0..*" TemplateApplication
+Roadmap "1" *-- "0..*" DomainEventReceipt
+RoadmapTask "1" *-- "0..1" DependencyOverride
+Roadmap ..> DomainEventOutbox : ROADMAP domain events
+TemplateTaskDefinition --> AnchorType
+RoadmapTask --> TaskOrigin
+
+note bottom of Roadmap
+  无 Action 实体
+  发布事件供 Action 域消费
+end note
+
+note right of TemplateTaskDefinition
+  GRS 锚点:
+  RDM-ANCHOR-GRS-001@v1
+  最近不晚于毕业的 9/1
+end note
+@enduml

@@ -1,0 +1,77 @@
+@startuml
+title Profile CRUD 服务层
+skinparam shadowing false
+hide empty methods
+
+package "profile.application" {
+  class ProfileQueryService {
+    +getProfile()
+    +getProfileOrEmpty()
+    +getFieldUsageMetadata()
+    +getActiveTargetRoleSearchTerms()
+  }
+
+  class ProfileCommandService {
+    +saveProfile(cmd)
+    +validateProfileDraft(draft)
+  }
+
+  class ProfileImpactAnalyzer {
+    +analyze(before, after)
+    +resolveAffectedScopes(impact)
+  }
+
+  class RecomputeRequestService {
+    +getPendingOrDeferred()
+    +buildPreview(id, scopes)
+    +defer(id)
+    +confirmAndExecute(id, cmd)
+  }
+
+  class ProfileBackupService {
+    +listBackups()
+    +runScheduledBackup()
+    +exportManual(cmd)
+    +previewRestore(backupId)
+    +confirmRestore(backupId, cmd)
+  }
+
+  class ProfileDomainService {
+    +validateInvariants()
+    +optimisticLock()
+  }
+}
+
+class ProfileRepository
+class RecomputeRequestRepository
+class ProfileBackupRepository
+class DomainEventOutboxWriter
+class FullDatabaseSnapshotWriter
+class RoadmapRecomputePort <<port>>
+class JobGateRecomputePort <<port>>
+class JobRankRecomputePort <<port>>
+
+ProfileCommandService --> ProfileDomainService
+ProfileCommandService --> ProfileImpactAnalyzer
+ProfileCommandService --> ProfileRepository
+ProfileCommandService --> RecomputeRequestRepository
+ProfileCommandService --> DomainEventOutboxWriter
+ProfileQueryService --> ProfileRepository
+RecomputeRequestService --> RecomputeRequestRepository
+RecomputeRequestService --> RoadmapRecomputePort : ROADMAP
+RecomputeRequestService --> JobGateRecomputePort : JOB_GATE
+RecomputeRequestService --> JobRankRecomputePort : JOB_RANK
+ProfileBackupService --> ProfileBackupRepository
+ProfileBackupService --> FullDatabaseSnapshotWriter
+
+note bottom of RecomputeRequestService
+  ROADMAP: preview token + explicit confirm
+  merge system unfinished Task only
+end note
+
+note bottom of ProfileBackupService
+  Sun 03:00 schedule
+  keep 4 backups
+  restore requires previewRestore
+end note
+@enduml

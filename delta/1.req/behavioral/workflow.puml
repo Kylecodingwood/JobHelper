@@ -1,0 +1,91 @@
+@startuml
+title Behavioral 题库、练习、反馈与删除流程
+skinparam shadowing false
+
+start
+:用户选择操作;
+
+if (操作类型？) then (开始练习)
+  :按能力主题浏览策展题\n或创建自定义题;
+  :选择问题;
+  :选择已有 STAR Evidence\n或新建 Evidence;
+  if (新建 Evidence？) then (是)
+    :分别填写 Situation/Task/Action/Result;
+    if (STAR 完整？) then (是)
+      :保存 COMPLETE Evidence 修订;
+    else (否)
+      :保存 DRAFT 并标识缺失部分;
+    endif
+  endif
+  :编写答案纯文本;
+  if (答案非空并保存？) then (是)
+    :创建不可变 AnswerVersion;
+    :固定问题快照和 Evidence 修订;
+  else (未完成)
+    :保留草稿并可生成 Action;
+    stop
+  endif
+  if (请求反馈？) then (是)
+    :固定答案、问题和 Evidence 输入版本;
+    if (需要外部 AI？) then (是)
+      if (Provider 已启用且\n对应类别已同意？) then (是)
+        :展示实际发送范围;
+        if (用户继续？) then (是)
+          :计算缓存键;
+          if (有效缓存命中？) then (是)
+            :记录命中并复用输出;
+          else (否)
+            :调用 provider 抽象;
+            :记录 provider/model/输入版本/\n提示版本/成本/输出;
+          endif
+        else (取消)
+          :反馈状态 = CANCELLED;
+          stop
+        endif
+      else (否)
+        :不外发敏感数据;
+        :运行本地检查或提示不可用;
+      endif
+    else (否)
+      :运行本地确定性检查;
+    endif
+    :检查 STAR_COMPLETENESS;
+    :检查 EVIDENCE_SPECIFICITY;
+    :生成引用答案片段的反馈项;
+    note right
+    不生成百分制总分
+    或面试成功概率
+    end note
+    :用户逐项接受、拒绝或忽略;
+    if (用户保存修订文本？) then (是)
+      :用户确认最终文本;
+      :创建新的 AnswerVersion;
+      :记录父版本和采纳反馈;
+    else (否)
+      :保留反馈决定和原版本;
+    endif
+  endif
+
+elseif (管理 Evidence)
+  :创建或编辑 STAR Evidence;
+  :编辑形成不可变新修订;
+  :历史答案继续引用原修订;
+
+else (删除敏感对象)
+  :选择 Answer 或 STAR Evidence;
+  :计算版本、引用、反馈、AI 内容\n和 Action 影响;
+  :展示不可恢复级联硬删除预览;
+  if (用户二次确认？) then (是)
+    :幂等级联硬删除敏感内容;
+    if (全部成功？) then (是)
+      :仅写入无内容删除审计事件;
+    else (否)
+      :报告剩余项并允许重试;
+    endif
+  else (取消)
+    :数据保持不变;
+  endif
+endif
+
+stop
+@enduml

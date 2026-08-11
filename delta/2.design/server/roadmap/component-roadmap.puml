@@ -1,0 +1,42 @@
+@startuml
+title Roadmap 域组件（Server）
+skinparam componentStyle rectangle
+
+package "roadmap" {
+  component "roadmap-api\nREST /api/v1/roadmap*" as api
+  component "roadmap-crud\nApplication + Domain" as crud
+  component "roadmap-model\nJPA Entities" as model
+  component "roadmap-workflow-generate\nGenerate/Merge/Event" as wf_gen
+}
+
+package "infra" {
+  component "domain-event-outbox\n(ROADMAP_*)" as outbox
+  component "domain-event-inbox\nCV/JOB/BEHAVIORAL" as inbox
+}
+
+package "external" {
+  component "profile\nAnchorPort / Recompute 链" as profile
+  component "action\n消费 ROADMAP_*" as action
+  database "PostgreSQL" as db
+}
+
+api --> crud
+crud --> model
+crud --> wf_gen
+wf_gen --> profile
+wf_gen --> outbox
+inbox --> wf_gen
+model --> db
+outbox --> action
+
+note bottom of wf_gen
+  首次 preview → confirm
+  merge 仅 SYSTEM 未完成
+  GRS 锚点 v1
+end note
+
+note bottom of model
+  无 Action 实体
+  DomainEventReceipt 幂等
+end note
+@enduml

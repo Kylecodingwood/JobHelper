@@ -1,0 +1,55 @@
+@startuml
+title Roadmap 生成与事件工作流（WF-RDM-GEN）
+start
+
+partition "模板准备 UC-RDM-001" {
+  :加载 SYSTEM RoadmapTemplateVersion;
+  if (用户上传 Markdown?) then (是)
+    :parseMarkdownPreview;
+    if (用户确认保存?) then (是)
+      :保存 USER TemplateVersion;
+    endif
+  endif
+  :USER 覆盖同键 SYSTEM 定义;
+}
+
+partition "锚点与候选任务" {
+  :读取 profileVersion;
+  :AnchorResolver\nCOURSE_START / GRADUATION;
+  :GRS = RDM-ANCHOR-GRS-001@v1\n最近不晚于毕业的 9/1;
+  :STAMP_EXPIRY = RDM-ANCHOR-STAMP-001@v1;
+  :dueAt = anchor + relativeOffset;
+  :校验 templateTaskKey 与 DAG;
+}
+
+if (已有 ACTIVE Roadmap?) then (否 - 首次)
+  :buildGeneratePreview\n+ previewToken;
+  if (用户确认?) then (否)
+    stop
+  endif
+  :confirmGenerate\n原子创建 Roadmap/Task/Dependency;
+else (是 - Profile 重算)
+  :buildMergePreview\n仅 SYSTEM 未完成;
+  :展示 protected 任务;
+  if (用户确认 merge?) then (否)
+    stop
+  endif
+  :confirmMerge\n更新 dueAt 等;
+endif
+
+:ActionabilityEngine.recalculate;
+
+partition "发布事件 UC-RDM-006" {
+  :Outbox ROADMAP_TASK_*;
+  :Outbox ROADMAP_RECOMPUTED;
+  note right: 无 Action 实体\nAction 域消费
+}
+
+partition "可选：领域事件追加 UC-RDM-005" {
+  :CV/JOB/BEHAVIORAL 事件;
+  :幂等 DomainEventReceipt;
+  :追加 CV_EVENT/JOB_EVENT/\nBEHAVIORAL_EVENT 任务;
+}
+
+stop
+@enduml

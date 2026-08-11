@@ -1,0 +1,77 @@
+@startuml
+title Action 聚合、排序与闭环流程
+skinparam shadowing false
+
+start
+:接收 Job/Roadmap/CV/Behavioral 领域事件\n(见 cross-domain-events.md);
+if (eventId 已处理?) then (是)
+  :幂等忽略重复事件;
+  stop
+endif
+if (事件版本早于当前源版本?) then (是)
+  :记录 IGNORED_STALE;
+  stop
+endif
+
+:按业务唯一键查找活动 Action;
+if (源对象仍需行动?) then (是)
+  if (已有活动 Action?) then (是)
+    :更新生成原因、期限和阻塞事实;
+  else (否)
+    :创建 Action 与生成证据;
+  endif
+else (否)
+  if (已有活动 Action?) then (是)
+    :按规则标记 COMPLETED 或 STALE\ncompletionMode=SOURCE_EVENT;
+    :active=false;
+  endif
+endif
+
+:计算可执行性;
+if (存在活动依赖?) then (是)
+  :Action 标记 BLOCKED;
+  :识别可解除阻塞的 Action;
+endif
+
+:按优先级因素计算稳定排序键;
+note right
+  1. deadline
+  2. blocker
+  3. user pin
+  4. system suggestion
+end note
+:保存逐因素 ActionPriorityEvidence;
+:Home 展示可执行准备 Action 和独立 New Job;
+
+if (用户点击 Action?) then (是)
+  if (目标存在?) then (是)
+    :导航到源对象并聚焦相关区域;
+  else (否)
+    :Action 标记 STALE 并提示重算;
+  endif
+endif
+
+if (用户操作 Action?) then (是)
+  if (PIN/UNPIN?) then (是)
+    :追加 ActionDecision;
+    :保留用户 pin 并重算排序;
+  elseif (COMPLETE/IGNORE?) then (是)
+    :追加 ActionDecision;
+    :completionMode=USER_CONFIRMED;
+    :active=false;
+    :从默认活动列表移除;
+  else (RESTORE)
+    :追加恢复决定;
+    :重新校验目标和生成条件;
+  endif
+endif
+
+:源对象后续变化再次发布事件闭环;
+note right
+  Roadmap 可从同事件追加任务；
+  Home 待办仅 Action 域维护。
+  查看、完成或置顶 Action 均不会自动
+  Shortlist Job、标记 Applied 或提交申请。
+end note
+stop
+@enduml

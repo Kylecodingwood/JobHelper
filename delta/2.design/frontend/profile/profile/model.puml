@@ -1,0 +1,63 @@
+@startuml profile-model
+title Profile 视图模型 (/profile)
+' Delta 链（文档）：model → component；为可预览，不内容 include 异构图
+hide circle
+skinparam classAttributeIconSize 0
+
+class ProfilePageViewModel {
+  mode: string
+}
+
+class ProfileFormVM {
+}
+
+class EducationPeriodVM {
+  educationPeriodId: UUID
+  institutionName: string
+}
+
+class WorkAuthorizationVM {
+  workAuthorizationId: UUID
+  permissionType: string
+}
+
+class TargetRoleVM {
+  targetRoleId: UUID
+  roleName: string
+}
+
+class LanguageProficiencyVM {
+  languageProficiencyId: UUID
+  languageCode: string
+  proficiency: string
+}
+
+class RecomputeRequestVM {
+  scopes: string[]
+  status: string
+}
+
+class BackupStatusVM {
+  retentionCount: int
+  scheduleCron: string
+}
+
+ProfilePageViewModel --> ProfileFormVM
+ProfileFormVM *-- EducationPeriodVM
+ProfileFormVM *-- WorkAuthorizationVM
+ProfileFormVM *-- TargetRoleVM
+ProfileFormVM *-- LanguageProficiencyVM
+ProfilePageViewModel --> RecomputeRequestVM
+ProfilePageViewModel --> BackupStatusVM
+
+note bottom of BackupStatusVM
+  retentionCount = 4
+  scheduleCron = Sun 03:00
+end note
+
+note bottom of RecomputeRequestVM
+  scopes: ROADMAP / JOB_GATE / JOB_RANK
+  status: PENDING / DEFERRED / ...
+end note
+
+@enduml

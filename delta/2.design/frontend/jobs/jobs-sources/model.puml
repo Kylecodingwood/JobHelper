@@ -1,0 +1,85 @@
+@startuml jobs-sources-model
+title Jobs Sources ViewModel (/jobs/sources)
+' Delta 链（文档）：model → component；为可预览，不内容 include 异构图
+hide circle
+skinparam classAttributeIconSize 0
+
+class SourceSummaryDto {
+  sourceId: UUID
+  code: string
+  role: string
+  enabled: boolean
+  searchTerms: string[]
+  lastRunStatus: string
+  lastRunAt: string
+}
+
+class SourceRunListFilters {
+  sourceId: UUID
+  status: string[]
+  triggerType: string[]
+  from: string
+  to: string
+  cursor: string
+}
+
+class SourceRunListItemDto {
+  sourceRunId: UUID
+  sourceCode: string
+  triggerType: string
+  status: string
+  startedAt: string
+  durationMs: int
+  createdCount: int
+  failedCount: int
+}
+
+class SourceRunDetailDto {
+  sourceRunId: UUID
+  status: string
+  parametersSnapshot: string
+  requestCount: int
+  receivedCount: int
+  validCount: int
+  createdCount: int
+  updatedCount: int
+  failedCount: int
+  durationMs: int
+}
+
+class SourceDiagnosticView {
+  category: string
+  site: string
+  message: string
+  occurredAt: string
+  retryCount: int
+}
+
+class DiagnosticGroupVm {
+  site: string
+  category: string
+  totalCount: int
+}
+
+class ManualRerunFormVm {
+  scope: string
+  sourceId: UUID
+  useLastParameters: boolean
+  referenceSourceRunId: UUID
+}
+
+class SourcesPage
+class SourceRunList
+class SourceRunDetail
+class DiagnosticsTable
+class ManualRerunDialog
+
+SourcesPage --> SourceSummaryDto
+SourcesPage --> SourceRunListFilters
+SourceRunList --> SourceRunListItemDto
+SourceRunDetail --> SourceRunDetailDto
+DiagnosticsTable --> DiagnosticGroupVm
+DiagnosticGroupVm --> SourceDiagnosticView
+ManualRerunDialog --> ManualRerunFormVm
+
+@enduml

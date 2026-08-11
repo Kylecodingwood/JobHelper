@@ -1,0 +1,28 @@
+@startuml profile-api
+title Profile API — 对齐后端
+' PUT 创建/更新；重算/备份挂 /profile/*
+
+actor User
+participant "ProfilePageShell" as UI
+participant "GET PUT /profile" as P
+participant "POST .../validate" as V
+participant "POST .../recompute-requests/*/preview" as Prev
+participant "POST .../recompute-requests/*/confirm" as Conf
+participant "GET POST /profile/backups*" as B
+
+User -> UI : onboarding / save
+UI -> V : optional
+UI -> P : PUT + expectedProfileVersion
+P --> UI : impactSummary + recomputeRequestId
+
+User -> UI : confirm recompute
+UI -> Prev : selectedScopes
+Prev --> UI : roadmapPreviewToken
+UI -> Conf : confirmRoadmapPreview
+Conf --> UI : resultSummary
+
+User -> UI : export / restore
+UI -> B
+B --> UI : backupId / restorePreview
+
+@enduml

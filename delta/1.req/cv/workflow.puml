@@ -1,0 +1,107 @@
+@startuml
+title CV 导入、评审、版本与删除流程
+skinparam shadowing false
+
+start
+:用户选择操作;
+
+if (操作类型？) then (上传 CV)
+  :选择 PDF/DOCX;
+  :校验实际类型、可读性与安全性;
+  if (校验通过？) then (是)
+    :保存不可变原文件;
+    :创建待确认 CVVersion;
+    :提取文本;
+    if (文本完整？) then (是)
+      :保存提取文本;
+    elseif (疑似不完整？) then (是)
+      :保存文本与不完整诊断;
+    else (失败/扫描件)
+      :标记 EXTRACTION_FAILED;
+      note right
+      v1 不执行 OCR；
+      可手工录入
+      end note
+    endif
+    :用户预览并编辑纯文本;
+    if (用户确认？) then (是)
+      :保存不可变确认文本;
+      :状态 = CONFIRMED;
+    else (暂不)
+      :状态 = CONFIRMATION_REQUIRED;
+    endif
+  else (否)
+    :拒绝文件且不创建可用版本;
+  endif
+
+elseif (发起评审)
+  :选择已确认 CVVersion;
+  if (评审类型？) then (通用健康)
+    :固定 CV 输入版本;
+  else (岗位定制)
+    :选择 Job 并固定 JD 快照;
+    if (Job/JD 可用？) then (是)
+    else (否)
+      :阻止定制评审;
+      stop
+    endif
+  endif
+  if (需要外部 AI？) then (是)
+    if (Provider 已启用且\n对应数据类别已同意？) then (是)
+      :展示本次发送范围;
+      if (用户继续？) then (是)
+        :计算缓存键;
+        if (有效缓存命中？) then (是)
+          :记录缓存命中并复用输出;
+        else (否)
+          :通过 provider 抽象调用;
+          :记录 provider/model/输入版本/\n提示版本/成本/输出;
+        endif
+      else (取消)
+        :评审状态 = CANCELLED;
+        stop
+      endif
+    else (否)
+      :不发送敏感数据;
+      :运行可用本地规则或提示不可用;
+    endif
+  else (否)
+    :运行本地确定性检查;
+  endif
+  :校验输出结构与事实约束;
+  :生成含原文、问题、依据、修改文本的建议;
+  :用户逐项接受、拒绝或暂缓;
+  if (至少一个有效接受项？) then (是)
+    :检测文本范围冲突;
+    if (无冲突且用户确认预览？) then (是)
+      :仅应用接受项;
+      :创建结构化文本子版本;
+      :提供复制;
+      note right
+      不覆盖原版本；
+      不生成 PDF/DOCX
+      end note
+    else (否)
+      :不创建新版本;
+    endif
+  else (否)
+    :保留决定，不创建版本;
+  endif
+
+else (删除 CV)
+  :计算文件、文本、版本、评审、\n建议、AI 内容及跨域引用影响;
+  :展示不可恢复级联硬删除预览;
+  if (用户二次确认？) then (是)
+    :幂等级联硬删除所有敏感内容;
+    if (全部删除成功？) then (是)
+      :仅写入无内容删除审计事件;
+    else (否)
+      :报告未完成项并允许重试;
+    endif
+  else (取消)
+    :数据保持不变;
+  endif
+endif
+
+stop
+@enduml

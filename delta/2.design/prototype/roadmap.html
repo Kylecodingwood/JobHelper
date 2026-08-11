@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Roadmap</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="jobs.html">Jobs</a>
+        <a class="active" href="roadmap.html">Roadmap</a>
+        <a href="profile.html">Profile</a>
+        <span class="nav-soon">CV · Behavioral（即将推出）</span>
+      </div>
+      <div class="nav-meta">单页 · 时间线</div>
+    </nav>
+
+    <div class="page">
+      <div class="topbar">
+        <h1>求职 Roadmap</h1>
+        <span style="font-size:12px;color:var(--ink-muted)">Active · IE Grad 2026</span>
+        <div class="spacer"></div>
+        <button class="btn btn-sm" type="button" onclick="openDrawer('templates')">模板</button>
+        <button class="btn btn-sm" type="button" onclick="openModal('gen')">生成</button>
+        <button class="btn btn-sm" type="button" onclick="openModal('rec')">重算 <span class="status-chip st-new" style="margin-left:4px">1</span></button>
+        <button class="btn btn-sm" type="button">系统更新</button>
+        <a class="btn btn-sm" href="index.html">Home Actions</a>
+      </div>
+
+      <div class="strip">
+        <span><strong style="color:var(--ink)">6</strong> ACTIONABLE</span>
+        <span><strong style="color:var(--danger)">2</strong> BLOCKED</span>
+        <span><strong>1</strong> UNSCHEDULED</span>
+        <span style="margin-left:auto">锚点：Graduation 2026-06 · Recruit season Sep-1</span>
+      </div>
+
+      <div class="timeline">
+        <div class="phase">
+          <div class="phase-title">Phase 1 · Foundation <span>Jun – Jul</span></div>
+          <div class="task-row" onclick="openDrawer('task')">
+            <div class="date">Jun 12</div>
+            <div><span class="dot-status dot-done"></span>完成 Profile 与工作许可录入</div>
+            <span class="badge badge-roadmap">SYSTEM</span>
+          </div>
+          <div class="task-row" onclick="openDrawer('task')">
+            <div class="date">Jul 01</div>
+            <div><span class="dot-status dot-progress"></span>更新 LinkedIn 摘要</div>
+            <span class="badge badge-roadmap">USER</span>
+          </div>
+          <div class="task-row" onclick="openDrawer('task')">
+            <div class="date">Jul 15</div>
+            <div><span class="dot-status dot-blocked"></span>准备 CV 初稿 <span style="color:var(--danger);font-size:12px">BLOCKED</span></div>
+            <span class="badge badge-roadmap">SYSTEM</span>
+          </div>
+        </div>
+
+        <div class="phase">
+          <div class="phase-title">Phase 2 · Recruit season <span>Aug – Sep</span></div>
+          <div class="task-row">
+            <div class="date">Aug 20</div>
+            <div><span class="dot-status dot-todo"></span>核对 Sep-1 招聘季投递清单</div>
+            <span class="badge badge-roadmap">SYSTEM</span>
+          </div>
+          <div class="task-row">
+            <div class="date">Sep 01</div>
+            <div><span class="dot-status dot-todo"></span>启动批量申请周</div>
+            <span class="badge badge-roadmap">SYSTEM</span>
+          </div>
+        </div>
+
+        <div class="unscheduled">
+          <strong style="font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:var(--ink-muted)">Unscheduled</strong>
+          <div class="task-row" style="margin-top:10px">
+            <div class="date">—</div>
+            <div><span class="dot-status dot-todo"></span>从 Job 事件追加：复习 System Design 基础</div>
+            <span class="badge badge-job">JOB_EVENT</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="drawer" onclick="if(event.target===this)closeDrawer()">
+    <aside class="drawer">
+      <div style="display:flex;justify-content:space-between">
+        <div>
+          <h2 id="drawerTitle">任务详情</h2>
+          <div class="sub" id="drawerSub">准备 CV 初稿</div>
+        </div>
+        <button class="btn btn-icon" type="button" onclick="closeDrawer()">✕</button>
+      </div>
+      <div id="drawerBody" class="evidence"></div>
+    </aside>
+  </div>
+
+  <div class="modal-center" id="gen" onclick="if(event.target===this)closeModal('gen')">
+    <div class="modal">
+      <h2>生成 Roadmap 预览</h2>
+      <p>锚点：Graduation 2026-06-15 · Stamp expiry 2027-03 · Recruit season Sep-1。确认后创建 Active Roadmap。</p>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closeModal('gen')">取消</button>
+        <button class="btn btn-primary" type="button" onclick="closeModal('gen')">确认生成</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-center" id="rec" onclick="if(event.target===this)closeModal('rec')">
+    <div class="modal">
+      <h2>重算预览</h2>
+      <p>仅 merge 系统未完成 Task；用户任务保留。来自 Profile 变更请求。</p>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="closeModal('rec')">稍后</button>
+        <button class="btn btn-primary" type="button" onclick="closeModal('rec')">确认重算</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="prototype-tag">prototype · /roadmap</div>
+  <script>
+    function openDrawer(kind) {
+      const title = document.getElementById('drawerTitle');
+      const sub = document.getElementById('drawerSub');
+      const body = document.getElementById('drawerBody');
+      if (kind === 'templates') {
+        title.textContent = '模板';
+        sub.textContent = '系统模板 + 用户 Markdown';
+        body.innerHTML = '<ol><li><strong>System</strong>IE Graduate default @v3</li><li><strong>User</strong>我的压缩版时间线</li></ol><p style="font-size:12px;color:var(--ink-muted)">非独立路由；小按钮打开</p>';
+      } else {
+        title.textContent = '任务详情';
+        sub.textContent = '准备 CV 初稿';
+        body.innerHTML = '<p style="font-size:13px">完成标准：上传初稿 PDF 并标记完成。</p><p style="font-size:13px;color:var(--danger)">依赖未满足：更新 LinkedIn 摘要</p><div style="margin-top:16px;display:flex;gap:8px"><button class="btn btn-sm btn-primary" type="button">完成</button><button class="btn btn-sm" type="button">依赖覆盖…</button></div>';
+      }
+      document.getElementById('drawer').classList.add('open');
+    }
+    function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
+    function openModal(id){ document.getElementById(id).classList.add('open'); }
+    function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+  </script>
+</body>
+</html>

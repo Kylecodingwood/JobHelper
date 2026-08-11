@@ -1,0 +1,123 @@
+@startuml jobs-inbox-model
+title Jobs Inbox ViewModel (/jobs)
+' Delta 链（文档）：model → component；为可预览，不内容 include 异构图
+hide circle
+skinparam classAttributeIconSize 0
+
+class JobsInboxFilters {
+  jobStatus: string[]
+  rankTier: string[]
+  gateStatus: string[]
+  sourceCode: string[]
+  validityStatus: string[]
+  hasPossibleDuplicate: boolean
+  showHidden: boolean
+  q: string
+  sort: string
+  cursor: string
+  limit: int
+}
+
+class JobListItemDto {
+  jobId: UUID
+  title: string
+  company: string
+  location: string
+  jobStatus: string
+  gateStatus: string
+  rankTier: string
+  validityStatus: string
+  hiddenByDefault: boolean
+  hasPossibleDuplicate: boolean
+  gateSummary: string
+  lastSeenAt: string
+  version: int
+}
+
+class JobDetailDto {
+  jobId: UUID
+  title: string
+  company: string
+  location: string
+  description: string
+  canonicalApplyUrl: string
+  expectedStartDate: string
+  jobStatus: string
+  gateStatus: string
+  rankTier: string
+  validityStatus: string
+  hiddenByDefault: boolean
+  ruleVersion: string
+  version: int
+  gateOverrideActive: boolean
+}
+
+class GateDimensionView {
+  dimension: string
+  outcome: string
+  explanation: string
+  ruleVersion: string
+}
+
+class RankFactorView {
+  dimension: string
+  outcome: string
+  explanation: string
+}
+
+class JobDecisionView {
+  decisionId: UUID
+  decisionType: string
+  fromValue: string
+  toValue: string
+  reason: string
+  createdAt: string
+}
+
+class PossibleDuplicatePanelVm {
+  duplicateId: UUID
+  status: string
+  signals: string[]
+  defaultSurvivorJobId: UUID
+}
+
+class DuplicateJobSummary {
+  jobId: UUID
+  title: string
+  jobStatus: string
+  firstSeenAt: string
+}
+
+class SaveUrlFormVm {
+  url: string
+  userProvidedJd: string
+  note: string
+}
+
+class GateOverrideFormVm {
+  reason: string
+  basedOnJobVersion: int
+}
+
+class JobsPage
+class JobsVirtualList
+class JobDetailSidebar
+class GateEvidenceSection
+class RankEvidenceSection
+class JobDecisionHistorySection
+class JobDuplicatePanel
+class SaveUrlDialog
+class GateOverrideForm
+
+JobsPage --> JobsInboxFilters
+JobsVirtualList --> JobListItemDto
+JobDetailSidebar --> JobDetailDto
+GateEvidenceSection --> GateDimensionView
+RankEvidenceSection --> RankFactorView
+JobDecisionHistorySection --> JobDecisionView
+JobDuplicatePanel --> PossibleDuplicatePanelVm
+PossibleDuplicatePanelVm --> DuplicateJobSummary
+SaveUrlDialog --> SaveUrlFormVm
+GateOverrideForm --> GateOverrideFormVm
+
+@enduml

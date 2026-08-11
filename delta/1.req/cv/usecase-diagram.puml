@@ -1,0 +1,60 @@
+@startuml
+title CV 领域用例图
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor "求职者" as User
+actor "文本提取器" as Parser
+actor "AI Provider\n（可选，默认禁用）" as AI
+actor "Job 域" as Job
+
+rectangle "CV 领域" {
+  usecase "UC-CV-001\n上传并提取 CV" as UC1
+  usecase "UC-CV-002\n确认或修正提取文本" as UC2
+  usecase "UC-CV-003\n通用 CV 健康评审" as UC3
+  usecase "UC-CV-004\n岗位定制 CV 评审" as UC4
+  usecase "UC-CV-005\n逐项决定建议" as UC5
+  usecase "UC-CV-006\n生成并复制新版本" as UC6
+  usecase "UC-CV-007\n管理 AI 同意与\n可追溯调用" as UC7
+  usecase "UC-CV-008\n预览并手动删除\nCV 敏感对象" as UC8
+  usecase "校验不得编造事实" as FactCheck
+  usecase "记录 provider/model/输入/\n提示/成本/输出与缓存" as Trace
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+
+Parser --> UC1
+Job --> UC4
+AI --> UC7
+
+UC1 ..> UC2 : <<include>>
+UC3 ..> UC7 : <<extend>>\n使用外部 AI 时
+UC4 ..> UC7 : <<extend>>\n使用外部 AI 时
+UC3 ..> FactCheck : <<include>>
+UC4 ..> FactCheck : <<include>>
+UC6 ..> FactCheck : <<include>>
+UC6 ..> UC5 : <<include>>
+UC7 ..> Trace : <<include>>
+
+note bottom of UC1
+仅 PDF/DOCX；v1 无 OCR
+end note
+
+note bottom of UC6
+仅结构化文本，可复制；
+不生成最终 PDF/DOCX
+end note
+
+note bottom of UC8
+级联硬删除内容；
+仅保留无内容审计事件
+end note
+@enduml

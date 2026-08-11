@@ -1,0 +1,65 @@
+@startuml
+title Job 域用例图
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor 求职者 as User
+actor 调度器 as Scheduler
+actor "FreeHire API" as FreeHire
+actor "JobSpy 站点" as JobSpy
+actor "Profile 域" as Profile
+actor "Action 域" as Action
+
+rectangle "Job Helper / Job" {
+  usecase "UC-JOB-001\n同步职位源" as UC1
+  usecase "UC-JOB-002\n快速保存公开 URL" as UC2
+  usecase "UC-JOB-003\n标准化、去重、\nGate 与 Rank" as UC3
+  usecase "UC-JOB-004\n查看和筛选 Inbox" as UC4
+  usecase "UC-JOB-005\n作出或覆盖职位决定" as UC5
+  usecase "UC-JOB-006\n处理可能重复职位" as UC6
+  usecase "UC-JOB-007\n刷新有效性并归档" as UC7
+  usecase "UC-JOB-008\n查看来源运行诊断" as UC8
+  usecase "UC-JOB-009\n手动重跑来源" as UC9
+  usecase "记录 SourceRun\n与错误诊断" as Diagnostics
+  usecase "保存规则证据" as Evidence
+}
+
+Scheduler --> UC1
+User --> UC2
+User --> UC4
+User --> UC5
+User --> UC6
+Scheduler --> UC7
+User --> UC7
+User --> UC8
+User --> UC9
+
+FreeHire --> UC1
+JobSpy --> UC1
+Profile --> UC3
+UC1 ..> UC3 : <<include>>
+UC1 ..> Diagnostics : <<include>>
+UC9 ..> UC1 : <<include>>
+UC3 ..> Evidence : <<include>>
+UC5 ..> Action : 发布变化
+UC7 ..> Action : 发布变化
+
+note right of UC1
+  FreeHire 为主源；
+  JobSpy 全部受支持站点默认启用；
+  搜索词默认来自 Profile TargetRole。
+  403/captcha 等只形成诊断。
+end note
+
+note bottom of UC3
+  标准化/硬去重先于 Gate；
+  Rank 五因素投票聚合 tier；
+  语言对照 LanguageProficiency。
+end note
+
+note bottom of UC5
+  系统只推荐；
+  Shortlist/Applied 仅由用户决定。
+end note
+@enduml

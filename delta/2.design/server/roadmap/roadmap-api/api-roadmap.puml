@@ -1,0 +1,66 @@
+@startuml
+title Roadmap REST API（/api/v1/roadmap*）
+skinparam componentStyle rectangle
+
+actor "React /roadmap" as FE
+
+package "Roadmap API" {
+  [GET /roadmap] as G0
+  [GET /roadmap/actionability] as G1
+  [GET /roadmap/templates] as G2
+  [POST /roadmap/templates/user/preview] as T1
+  [POST /roadmap/templates/user] as T2
+  [POST /roadmap/generate/preview] as GP
+  [POST /roadmap/generate/confirm] as GC
+  [POST /roadmap/recompute/preview] as RP
+  [POST /roadmap/recompute/confirm] as RC
+  [POST /roadmap/tasks/{id}/complete] as TC
+  [GET /roadmap/template-updates/preview] as UP
+  [POST /roadmap/template-updates/apply] as UA
+}
+
+component RoadmapApplicationService
+component RoadmapGenerationService
+component RoadmapTaskCommandService
+component ActionabilityEngine
+component DomainEventOutbox
+
+FE --> G0
+FE --> G1
+FE --> G2
+FE --> T1
+FE --> T2
+FE --> GP
+FE --> GC
+FE --> RP
+FE --> RC
+FE --> TC
+FE --> UP
+FE --> UA
+
+G0 --> RoadmapApplicationService
+GP --> RoadmapGenerationService
+GC --> RoadmapGenerationService
+RP --> RoadmapGenerationService
+RC --> RoadmapGenerationService
+TC --> RoadmapTaskCommandService
+RoadmapTaskCommandService --> ActionabilityEngine
+ActionabilityEngine --> DomainEventOutbox
+
+note right of GP
+  首次基线
+  preview → confirm
+  GRS = 最近不晚于毕业的 9/1
+end note
+
+note right of RC
+  merge 仅 SYSTEM
+  未完成 Task
+end note
+
+note bottom of DomainEventOutbox
+  ROADMAP_TASK_*
+  ROADMAP_RECOMPUTED
+  → Action 域消费
+end note
+@enduml

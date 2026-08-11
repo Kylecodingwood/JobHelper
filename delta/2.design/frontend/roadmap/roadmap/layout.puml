@@ -1,0 +1,38 @@
+@startuml roadmap-layout
+title Roadmap 布局 (/roadmap)
+
+skinparam rectangle {
+  BorderColor #333
+  BackgroundColor #FAFAFA
+}
+
+rectangle "RoadmapPageShell" as shell {
+  rectangle "RoadmapTopBar\n48px" as top #E8EEF4 {
+    rectangle "RoadmapToolbar\nicon buttons" as toolbar
+    rectangle "Link to Home Actions" as homeLink
+  }
+  rectangle "RoadmapActionabilityStrip\n(optional 32px)" as strip #EEF2E6
+  rectangle "RoadmapTimeline\nscroll" as timeline #FFFFFF {
+    rectangle "RoadmapPhaseGroup × N" as phase
+    rectangle "RoadmapDateAxis\n80px" as axis
+    rectangle "RoadmapTaskRow × N" as rows
+  }
+  rectangle "RoadmapUnscheduledPanel\nbottom" as unsched #F5F5F5
+  rectangle "RoadmapEmptyState\n(conditional)" as empty
+}
+
+top -[hidden]down- strip
+strip -[hidden]down- timeline
+timeline -[hidden]down- unsched
+
+note right of toolbar
+  模板 / 生成 / 重算 / 系统更新
+  抽屉与对话框 — 非独立路由
+end note
+
+note bottom of homeLink
+  UC-RDM-006
+  不在此页排序 Action
+end note
+
+@enduml

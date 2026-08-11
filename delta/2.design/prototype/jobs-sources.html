@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Sources</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a class="active" href="jobs.html">Jobs</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="profile.html">Profile</a>
+        <span class="nav-soon">CV · Behavioral（即将推出）</span>
+      </div>
+      <div class="nav-meta">Sources · 诊断</div>
+    </nav>
+
+    <div class="split-page page">
+      <div class="topbar">
+        <a class="btn btn-sm" href="jobs.html">← Inbox</a>
+        <h1>职位来源与同步</h1>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-primary" type="button">手动同步</button>
+        <button class="btn btn-sm" type="button">刷新</button>
+      </div>
+
+      <div class="source-strip">
+        <div class="source-card">
+          <strong>FreeHire API</strong>
+          PRIMARY · <span class="toggle" title="enabled"></span>
+          <div style="margin-top:6px;color:var(--ink-muted)">上次成功 06:02 · SUCCEEDED</div>
+        </div>
+        <div class="source-card">
+          <strong>JobSpy · Indeed IE</strong>
+          SUPPLEMENTAL · <span class="toggle" title="enabled"></span>
+          <div style="margin-top:6px;color:var(--ink-muted)">上次 06:08 · PARTIAL</div>
+        </div>
+        <div class="source-card">
+          <strong>JobSpy · LinkedIn</strong>
+          SUPPLEMENTAL · <span class="toggle off" title="disabled"></span>
+          <div style="margin-top:6px;color:var(--ink-muted)">已关闭</div>
+        </div>
+        <div class="source-card">
+          <strong>manual_url</strong>
+          MANUAL · <span class="toggle"></span>
+          <div style="margin-top:6px;color:var(--ink-muted)">按需</div>
+        </div>
+      </div>
+
+      <div class="filterbar">
+        <span class="chip on">全部来源</span>
+        <span class="chip">SCHEDULED</span>
+        <span class="chip">MANUAL</span>
+        <span class="chip">FAILED</span>
+        <span style="margin-left:auto;color:var(--ink-muted)">下次定时 明日 06:00</span>
+      </div>
+
+      <div class="split">
+        <div class="list-pane">
+          <div class="job-row run-row selected">
+            <span class="tier-dot tier-high"></span>
+            <div>
+              <div class="title">FreeHire · SCHEDULED</div>
+              <div class="sub">06:00–06:02 · +12 created · 0 failed</div>
+            </div>
+            <span class="status-chip st-short">OK</span>
+          </div>
+          <div class="job-row run-row">
+            <span class="tier-dot tier-med"></span>
+            <div>
+              <div class="title">JobSpy Indeed · SCHEDULED</div>
+              <div class="sub">06:02–06:08 · +3 · HTTP_429 ×2</div>
+            </div>
+            <span class="status-chip st-new">PARTIAL</span>
+          </div>
+          <div class="job-row run-row">
+            <span class="tier-dot tier-low"></span>
+            <div>
+              <div class="title">JobSpy LinkedIn · MANUAL</div>
+              <div class="sub">昨 21:14 · CAPTCHA</div>
+            </div>
+            <span class="status-chip st-ignore">FAILED</span>
+          </div>
+        </div>
+
+        <aside class="detail-pane">
+          <h2>SourceRun 详情</h2>
+          <div class="company">freehire-2026-07-30-0600 · SUCCEEDED · 128s</div>
+          <div class="metrics">
+            <div class="metric"><b>84</b><span>request</span></div>
+            <div class="metric"><b>79</b><span>received</span></div>
+            <div class="metric"><b>12</b><span>created</span></div>
+            <div class="metric"><b>0</b><span>failed</span></div>
+          </div>
+          <div class="ev-section">
+            <h3>参数快照（脱敏）</h3>
+            <pre style="margin:0;font-size:11px;overflow:auto;background:var(--paper);padding:8px;border-radius:6px">{
+  "searchTerms": ["graduate software", "junior java"],
+  "location": "Ireland",
+  "adapter": "FREEHIRE_API"
+}</pre>
+          </div>
+          <div class="ev-section">
+            <h3>诊断</h3>
+            <p style="margin:0;font-size:13px;color:var(--ink-muted)">无错误分类记录</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" type="button">重跑相同参数</button>
+            <a class="btn btn-sm" href="jobs.html">查看新增职位</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+  <div class="prototype-tag">prototype · /jobs/sources</div>
+</body>
+</html>

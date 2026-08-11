@@ -1,0 +1,154 @@
+@startuml
+title Profile 域模型（Server / PostgreSQL）
+hide methods
+skinparam classAttributeIconSize 0
+
+package "聚合根" {
+  class Profile {
+    +profileId: UUID
+    +profileVersion: Integer
+    +lifecycle: ProfileLifecycle
+    +createdAt: DateTime
+    +updatedAt: DateTime
+  }
+}
+
+class EducationPeriod {
+  +educationPeriodId: UUID
+  +institutionName: String
+  +programmeName: String
+  +startDate: Date
+  +expectedGraduationDate: Date
+  +countryCode: String
+  +isPrimary: Boolean
+}
+
+class WorkAuthorization {
+  +workAuthorizationId: UUID
+  +countryCode: String
+  +permissionType: PermissionType
+  +validFrom: Date
+  +validUntil: Date
+  +weeklyHoursLimit: Decimal
+  +isFuture: Boolean
+}
+
+class TargetRole {
+  +targetRoleId: UUID
+  +roleName: String
+  +seniority: Seniority
+  +location: String
+  +priorityOrder: Integer
+  +active: Boolean
+}
+
+class LanguageProficiency {
+  +languageProficiencyId: UUID
+  +languageCode: String
+  +proficiency: LanguageProficiencyLevel
+  +evidenceRef: String?
+  +notes: String?
+}
+
+class SkillEvidence {
+  +skillEvidenceId: UUID
+  +skillName: String
+  +proficiency: SkillProficiency
+  +evidenceType: EvidenceType
+  +evidenceRef: String?
+  +experienceEvidenceId: UUID?
+}
+
+class ExperienceEvidence {
+  +experienceEvidenceId: UUID
+  +title: String
+  +experienceType: ExperienceType
+  +organizationName: String
+  +startDate: Date
+  +endDate: Date?
+  +description: Text?
+}
+
+class RecomputeRequest {
+  +recomputeRequestId: UUID
+  +profileVersion: Integer
+  +scopes: RecomputeScope[]
+  +status: RecomputeStatus
+  +changeSummary: JSON
+  +impactSummary: JSON
+  +resultSummary: JSON?
+}
+
+class ProfileBackupMetadata {
+  +backupId: UUID
+  +backupType: BackupType
+  +filePath: String
+  +checksumSha256: String
+  +appSchemaVersion: String
+  +retentionRank: Integer?
+}
+
+class DomainEventOutbox {
+  +eventId: UUID
+  +eventType: String
+  +sourceObjectVersion: Integer
+  +payload: JSON
+}
+
+enum PermissionType {
+  STAMP_2
+  STAMP_1G
+  STAMP_1
+  STAMP_4
+  EU_EEA_CITIZEN
+  OTHER
+}
+
+enum LanguageProficiencyLevel {
+  NATIVE .. UNKNOWN
+}
+
+enum RecomputeScope {
+  ROADMAP
+  JOB_GATE
+  JOB_RANK
+}
+
+enum RecomputeStatus {
+  PENDING
+  DEFERRED
+  RUNNING
+  COMPLETED
+  PARTIALLY_FAILED
+  FAILED
+  SUPERSEDED
+}
+
+Profile "1" *-- "1..*" EducationPeriod
+Profile "1" *-- "1..*" WorkAuthorization
+Profile "1" *-- "1..*" TargetRole
+Profile "1" *-- "0..*" LanguageProficiency
+Profile "1" *-- "0..*" SkillEvidence
+Profile "1" *-- "0..*" ExperienceEvidence
+Profile "1" --> "0..*" RecomputeRequest
+Profile "1" --> "0..*" ProfileBackupMetadata
+Profile ..> DomainEventOutbox : publishes
+SkillEvidence "0..*" --> "0..1" ExperienceEvidence
+WorkAuthorization --> PermissionType
+LanguageProficiency --> LanguageProficiencyLevel
+
+note bottom of Profile
+  v1 全库唯一 ACTIVE Profile；
+  保存递增 profileVersion。
+end note
+
+note right of LanguageProficiency
+  Job Gate 语言维度输入；
+  languageCode 大小写无关唯一。
+end note
+
+note bottom of RecomputeRequest
+  ROADMAP scope 须预览确认；
+  不得覆盖用户 Job/Roadmap 决定。
+end note
+@enduml

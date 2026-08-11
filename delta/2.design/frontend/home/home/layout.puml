@@ -1,0 +1,41 @@
+@startuml home-layout
+title Home 布局 (/)
+
+skinparam rectangle {
+  BorderColor #333
+  BackgroundColor #FAFAFA
+}
+
+rectangle "HomePageShell\n(100% viewport - Nav)" as shell {
+  rectangle "HomeTopBar\n48px" as top #E8EEF4
+  rectangle "HomeDegradedBanner\n(conditional)" as banner #FFF3CD
+  rectangle "HomeMainColumn\nmax-width 960px centered" as col {
+    rectangle "HomeActionSection" as actions {
+      rectangle "SectionHeader\n今日优先" as ah
+      rectangle "HomeActionList\nstack cards gap 12px" as alist #FFFFFF
+      rectangle "HomeBlockedSummary\n(collapsible)" as blocked #F5F5F5
+      rectangle "HomeEmptyState\n(conditional)" as empty #EEEEEE
+    }
+    rectangle "HomeNewJobsSection\n(conditional)" as newjobs #EEF2E6 {
+      rectangle "NewJobsHeader" as njh
+      rectangle "HomeNewJobCards\nhorizontal scroll / grid" as njc
+    }
+  }
+}
+
+top -[hidden]down- banner
+banner -[hidden]down- col
+ah -[hidden]down- alist
+alist -[hidden]down- blocked
+
+note right of alist
+  默认 Top 5 OPEN Action
+  BLOCKED 不在主列表
+end note
+
+note bottom of newjobs
+  status=New 独立展示
+  不自动 Shortlist
+end note
+
+@enduml

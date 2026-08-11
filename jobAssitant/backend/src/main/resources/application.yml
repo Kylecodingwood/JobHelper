@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: job-helper-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/jobhelper
+    username: jobhelper
+    password: jobhelper
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.jobhelper: INFO
+
+jobhelper:
+  outbox:
+    poll-ms: 5000
+  backup:
+    dir: ./data/backups
+    cron: "0 0 3 * * SUN"
+  sync:
+    freehire-limit: 100
+    freehire-max-pages: 3
+    cron: "0 0 6 * * *"
+  jobspy:
+    script: ""
+    timeout-seconds: 300
+    results-wanted: 50
+  cv:
+    dir: ./data/cv
+    max-bytes: 10485760

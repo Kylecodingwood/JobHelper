@@ -1,0 +1,26 @@
+@startuml roadmap-components
+title Roadmap 组件 (/roadmap)
+' Delta 链（文档）：component → layout；为可预览，不内容 include 异构图
+
+component "RoadmapTopBar" as top
+component "RoadmapToolbar" as toolbar
+component "RoadmapHomeLink\nid: roadmap-home-link" as home
+component "RoadmapTaskRow x N" as row
+component "RoadmapTaskDetailDrawer\nid: roadmap-task-detail-drawer" as tdrawer2
+component "RoadmapDependencyOverrideDialog" as override
+component "RoadmapTemplateDrawer\nid: roadmap-template-drawer" as tdrawer
+component "RoadmapGeneratePreviewDialog" as gen
+component "RoadmapRecomputePreviewDialog" as rec
+component "RoadmapSystemUpdateDialog" as upd
+
+top --> toolbar
+top --> home
+row --> tdrawer2 : click
+tdrawer2 --> override : complete blocked
+toolbar --> tdrawer : templates
+toolbar --> gen : generate
+toolbar --> rec : recompute
+toolbar --> upd : system update
+home --> home : navigate /
+
+@enduml

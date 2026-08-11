@@ -1,0 +1,66 @@
+@startuml
+title Gate + Rank 工作流
+skinparam shadowing false
+
+start
+:标准化 + 硬去重完成;
+
+partition "Gate 四维度" {
+  :LOCATION Ireland / EU+visa / remote-IE;
+  :WORK_AUTH Profile at expectedStartDate;
+  if (expectedStartDate missing?) then (yes)
+    #Orange:WORK_AUTH = NEEDS_CONFIRMATION;
+  endif
+  :SENIORITY Intern/Grad/Junior/UNK pass;
+  :LANGUAGE vs Profile LanguageProficiency;
+  :append RuleEvidence GATE;
+}
+
+:aggregate gateStatus;
+
+if (any FAIL?) then (yes)
+  :gateStatus=FAILED hiddenByDefault=true rankTier=UNRANKED;
+  stop
+elseif (any NEEDS_CONFIRMATION?) then (yes)
+  :gateStatus=NEEDS_CONFIRMATION;
+  :publish JOB_GATE_NEEDS_CONFIRMATION;
+else (all PASS)
+  :gateStatus=PASSED;
+endif
+
+if (PASSED or GATE_OVERRIDE?) then (yes)
+  partition "Rank vote" {
+    :TARGET_ROLE evidence;
+    :SKILL evidence;
+    :FRESHNESS evidence;
+    :LOCATION_FIT evidence;
+    :GROWTH evidence;
+    :factors POS/NEU/NEG;
+  }
+  if (ge 3 POS and 0 NEG?) then (yes)
+    :rankTier = HIGH;
+  elseif (ge 2 NEG?) then (yes)
+    :rankTier = LOW;
+  else
+    :rankTier = MEDIUM;
+  endif
+  :append RuleEvidence RANK x5;
+else (no)
+  :rankTier = UNRANKED;
+endif
+
+:update hiddenByDefault projection;
+if (new Job?) then (yes)
+  :JOB_CREATED;
+endif
+
+floating note
+  BR-JOB-007: missing expectedStartDate
+  -> WORK_AUTH = NEEDS_CONFIRMATION only
+  ge3 POS and 0 NEG -> HIGH
+  ge2 NEG -> LOW
+  else MEDIUM
+end note
+
+stop
+@enduml

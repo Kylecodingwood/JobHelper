@@ -1,0 +1,37 @@
+@startuml
+title Profile 用例图
+left to right direction
+
+actor "求职者" as User
+
+rectangle "Profile Domain" {
+  usecase "UC-PRO-001\n首次配置求职档案" as UC1
+  usecase "UC-PRO-002\n更新求职档案" as UC2
+  usecase "UC-PRO-003\n确认并执行影响重算" as UC3
+  usecase "UC-PRO-004\n查看档案用途与敏感性" as UC4
+  usecase "UC-PRO-005\n自动本地备份" as UC5
+  usecase "UC-PRO-006\n手动导出完整 ZIP" as UC6
+  usecase "UC-PRO-007\n从备份恢复并预览" as UC7
+  usecase "校验教育、目标、许可与证据" as Validate
+  usecase "分析 Roadmap / Gate / Rank 影响" as Impact
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC6
+User --> UC7
+UC5 ..> UC1 : <<extend>>\nProfile 存在时
+UC1 .> Validate : <<include>>
+UC2 .> Validate : <<include>>
+UC2 .> Impact : <<include>>
+UC3 .> UC1 : <<extend>>\n产生待确认请
+UC3 .> UC2 : <<extend>>\n有业务影响时
+
+note right of UC3
+  必须显式确认；
+  ROADMAP 须预览确认；
+  推迟 → DEFERRED。
+end note
+@enduml

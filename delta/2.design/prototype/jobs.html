@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Helper — Jobs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="shared.css" />
+</head>
+<body>
+  <div class="app">
+    <nav class="nav">
+      <a class="nav-brand" href="index.html">Job <span>Helper</span></a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a class="active" href="jobs.html">Jobs</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="profile.html">Profile</a>
+        <span class="nav-soon">CV · Behavioral（即将推出）</span>
+      </div>
+      <div class="nav-meta">Inbox · 高密度</div>
+    </nav>
+
+    <div class="split-page page">
+      <div class="topbar">
+        <h1>Jobs Inbox</h1>
+        <span class="status-chip st-new">18</span>
+        <div class="spacer"></div>
+        <button class="btn btn-sm btn-primary" type="button" onclick="document.getElementById('saveUrl').classList.add('open')">保存 URL</button>
+        <a class="btn btn-sm" href="jobs-sources.html">来源 / 同步</a>
+      </div>
+
+      <div class="filterbar">
+        <span class="chip on">Inbox 默认</span>
+        <span class="chip">NEW</span>
+        <span class="chip">SHORTLISTED</span>
+        <span class="chip">HIGH</span>
+        <span class="chip">Gate 待确认</span>
+        <span class="chip">可能重复</span>
+        <span class="chip">显示隐藏项</span>
+        <input placeholder="搜索标题 / 公司" style="margin-left:auto;padding:4px 8px;border:1px solid var(--line);border-radius:6px;min-width:160px" />
+      </div>
+
+      <div class="split">
+        <div class="list-pane" id="list">
+          <div class="job-row selected" data-id="1" onclick="selectRow(this)">
+            <span class="tier-dot tier-high"></span>
+            <div>
+              <div class="title">Graduate Software Engineer</div>
+              <div class="sub">Intercom · Dublin · Gate PASSED · 2h ago</div>
+            </div>
+            <span class="status-chip st-new">NEW</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-med"></span>
+            <div>
+              <div class="title">Junior Backend Engineer — Java</div>
+              <div class="sub">Workday · Dublin · Gate NEEDS_CONFIRMATION</div>
+            </div>
+            <span class="status-chip st-new">NEW</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-high"></span>
+            <div>
+              <div class="title">Software Engineer, Early Career</div>
+              <div class="sub">Stripe · Dublin · 可能重复</div>
+            </div>
+            <span class="status-chip st-short">SHORTLIST</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-low"></span>
+            <div>
+              <div class="title">Platform Engineer</div>
+              <div class="sub">HubSpot · Remote IE · Rank LOW</div>
+            </div>
+            <span class="status-chip st-new">NEW</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-med"></span>
+            <div>
+              <div class="title">Graduate Programme — Technology</div>
+              <div class="sub">Accenture · Dublin</div>
+            </div>
+            <span class="status-chip st-ignore">IGNORED</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-high"></span>
+            <div>
+              <div class="title">Backend Engineer (New Grad)</div>
+              <div class="sub">Amazon · Dublin · Applied</div>
+            </div>
+            <span class="status-chip st-applied">APPLIED</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-med"></span>
+            <div>
+              <div class="title">Java Developer — Graduate</div>
+              <div class="sub">Ericsson · Athlone</div>
+            </div>
+            <span class="status-chip st-new">NEW</span>
+          </div>
+          <div class="job-row" onclick="selectRow(this)">
+            <span class="tier-dot tier-none"></span>
+            <div>
+              <div class="title">Staff Engineer（示例隐藏项外）</div>
+              <div class="sub">— UNRANKED 通常不出现</div>
+            </div>
+            <span class="status-chip st-new">NEW</span>
+          </div>
+        </div>
+
+        <aside class="detail-pane">
+          <h2>Graduate Software Engineer</h2>
+          <div class="company">Intercom · Dublin, Ireland · FreeHire</div>
+          <div class="status-bar">
+            <button class="btn btn-sm btn-primary" type="button">Shortlist</button>
+            <button class="btn btn-sm" type="button">Ignore</button>
+            <button class="btn btn-sm" type="button">Applied</button>
+            <button class="btn btn-sm" type="button">Archive</button>
+            <a class="btn btn-sm" href="#" onclick="return false">申请链接 ↗</a>
+          </div>
+
+          <div class="ev-section">
+            <h3>Gate 四维</h3>
+            <div class="dim"><span>LOCATION</span><span>Ireland / Dublin 命中</span><span class="ok">PASS</span></div>
+            <div class="dim"><span>WORK_AUTH</span><span>Stamp 1 在 expectedStartDate 有效</span><span class="ok">PASS</span></div>
+            <div class="dim"><span>SENIORITY</span><span>Graduate / Early career</span><span class="ok">PASS</span></div>
+            <div class="dim"><span>LANGUAGE</span><span>EN B2+ vs Profile</span><span class="ok">PASS</span></div>
+          </div>
+
+          <div class="ev-section">
+            <h3>Rank 五因素（无综合分）</h3>
+            <div class="dim"><span>TARGET_ROLE</span><span>与 Backend / Grad 对齐</span><span class="pos">POS</span></div>
+            <div class="dim"><span>SKILL</span><span>Java, Spring 提及</span><span class="pos">POS</span></div>
+            <div class="dim"><span>FRESHNESS</span><span>48h 内抓取</span><span class="pos">POS</span></div>
+            <div class="dim"><span>LOCATION_FIT</span><span>Dublin</span><span class="neu">NEU</span></div>
+            <div class="dim"><span>GROWTH</span><span>培训路径写明</span><span class="pos">POS</span></div>
+            <p style="margin:8px 0 0;font-size:12px;color:var(--ink-muted)">≥3 POS 且 0 NEG → <strong style="color:var(--tier-high)">HIGH</strong></p>
+          </div>
+
+          <div class="ev-section">
+            <h3>可能重复</h3>
+            <p style="margin:0;font-size:13px;color:var(--ink-muted)">无待处理重复关系</p>
+          </div>
+
+          <div class="ev-section">
+            <h3>决定历史</h3>
+            <p style="margin:0;font-size:12px;color:var(--ink-muted)">— 尚无用户决定</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-center" id="saveUrl" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+      <h2>保存公开职位 URL</h2>
+      <p>硬去重后入库；可选粘贴 JD / 备注。</p>
+      <div class="field"><label>URL</label><input placeholder="https://…" value="https://jobs.example.com/grad-swe" /></div>
+      <div class="field"><label>备注（可选）</label><textarea rows="2"></textarea></div>
+      <div class="modal-actions">
+        <button class="btn" type="button" onclick="document.getElementById('saveUrl').classList.remove('open')">取消</button>
+        <button class="btn btn-primary" type="button" onclick="document.getElementById('saveUrl').classList.remove('open')">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="prototype-tag">prototype · /jobs</div>
+  <script>
+    function selectRow(el) {
+      document.querySelectorAll('.job-row').forEach(r => r.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

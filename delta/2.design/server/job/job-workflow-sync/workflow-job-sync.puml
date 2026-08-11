@@ -1,0 +1,65 @@
+@startuml
+title Job 每日同步工作流（06:00 + 手动）
+skinparam shadowing false
+
+|调度器 / 用户|
+start
+:06:00 或 POST /job-source-runs;
+
+|JobSourceService|
+:resolveEffectiveSearchTerms\n= Profile TargetRole.roleName\n  ∪ source override DISTINCT;
+
+|JobSourceRunService|
+:创建新 SourceRun\n(trigger=SCHEDULED|MANUAL);
+:status = RUNNING;
+
+partition "按 Source 并行（站点隔离）" {
+  |FreeHireAdapter|
+  :GET freehire.me/api/v1/jobs/search\ncountries=ie + searchTerms;
+  
+  |JobSpyAdapter|
+  :Python 子进程 per enabled site\nlocation=Ireland;
+  
+  |JobRawPostingService|
+  :幂等 upsert RawPosting;
+  if (parse OK?) then (yes)
+    |JobNormalizationService|
+    :标准化 + 硬去重;
+    |JobGateRankService|
+    :Gate → Rank;
+    |JobDomainEventPublisher|
+    :JOB_CREATED /\nJOB_GATE_NEEDS_CONFIRMATION;
+  else (no)
+    |JobSourceRunService|
+    :appendDiagnostic\n(PARSE|VALIDATION);
+  endif
+}
+
+|JobSourceRunService|
+if (有成功且有失败?) then (yes)
+  :PARTIAL_SUCCESS;
+elseif (全无成功?) then (yes)
+  :FAILED;
+else (no)
+  :SUCCEEDED;
+endif
+:写入计数 + diagnostics + endedAt;
+
+|JobValidityService|
+:refreshAllDue(touched jobs);
+
+|用户 / UI|
+:/jobs/sources 查看诊断;
+stop
+
+note right
+  单站点 403/429/captcha
+  不 rollback 其他站点
+  不生成损坏 CanonicalJob
+end note
+
+note left
+  重跑始终新 sourceRunId
+  相同 stableId 幂等更新
+end note
+@enduml

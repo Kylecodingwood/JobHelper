@@ -1,0 +1,128 @@
+@startuml
+title Job 域实体关系
+hide methods
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class Source <<aggregate root>> {
+  +sourceId: UUID
+  +code: String
+  +adapterType: AdapterType
+  +site: String?
+  +role: SourceRole
+  +enabled: Boolean
+  +schedule: String
+  +searchTerms: String[]
+  +configVersion: String
+}
+
+class SourceRun {
+  +sourceRunId: UUID
+  +triggerType: TriggerType
+  +status: RunStatus
+  +parametersSnapshot: JSON
+  +startedAt: Instant
+  +endedAt: Instant?
+  +createdCount: Integer
+  +updatedCount: Integer
+  +failedCount: Integer
+}
+
+class SourceDiagnostic {
+  +diagnosticId: UUID
+  +category: ErrorCategory
+  +site: String?
+  +message: String
+  +requestId: String?
+  +retryCount: Integer
+  +occurredAt: Instant
+}
+
+class RawPosting {
+  +rawPostingId: UUID
+  +sourceStableId: String?
+  +sourceUrl: String?
+  +canonicalUrl: String?
+  +rawPayload: JSON
+  +userProvidedJd: Text?
+  +parseStatus: ParseStatus
+  +fetchedAt: Instant
+}
+
+class CanonicalJob <<aggregate root>> {
+  +jobId: UUID
+  +title: String?
+  +company: String?
+  +location: String?
+  +expectedStartDate: Date?
+  +seniority: Seniority
+  +gateStatus: GateStatus
+  +rankTier: RankTier
+  +jobStatus: JobStatus
+  +validityStatus: ValidityStatus
+  +hiddenByDefault: Boolean
+  +version: Integer
+}
+
+class JobSourceRef {
+  +jobSourceRefId: UUID
+  +isPreferred: Boolean
+  +linkedAt: Instant
+}
+
+class RuleEvidence {
+  +evidenceId: UUID
+  +evaluationType: EvaluationType
+  +dimension: String
+  +outcome: EvidenceOutcome
+  +ruleId: String
+  +ruleVersion: String
+  +factSourceRef: String
+  +explanation: String
+  +evaluatedAt: Instant
+}
+
+class JobDecision {
+  +decisionId: UUID
+  +decisionType: DecisionType
+  +fromValue: String?
+  +toValue: String?
+  +reason: String?
+  +actor: USER
+  +createdAt: Instant
+  +basedOnJobVersion: Integer
+}
+
+class PossibleDuplicate {
+  +duplicateId: UUID
+  +signals: JSON
+  +status: DuplicateStatus
+}
+
+Source "1" *-- "0..*" SourceRun
+SourceRun "1" *-- "0..*" SourceDiagnostic
+SourceRun "1" *-- "0..*" RawPosting
+Source "1" -- "0..*" RawPosting
+CanonicalJob "1" *-- "1..*" JobSourceRef
+JobSourceRef "*" --> "1" RawPosting
+CanonicalJob "1" *-- "0..*" RuleEvidence
+CanonicalJob "1" *-- "0..*" JobDecision
+PossibleDuplicate "*" --> "1" CanonicalJob : left
+PossibleDuplicate "*" --> "1" CanonicalJob : right
+
+note right of RawPosting
+  原始数据不可被标准化结果覆盖；
+  INVALID 不进入普通 Jobs 列表。
+end note
+
+note bottom of CanonicalJob
+  Gate/有效性/用户状态彼此分离。
+  Gate 失败与 Expired 只默认隐藏，不删除。
+end note
+
+note bottom of PossibleDuplicate
+  fuzzy 只提示；
+  确认合并保留较早 Job；
+  冲突决定须用户选择。
+end note
+@enduml

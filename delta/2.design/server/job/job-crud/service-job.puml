@@ -1,0 +1,92 @@
+@startuml
+title Job 域应用服务
+skinparam shadowing false
+
+package "job.application" {
+  class JobSourceService {
+    +listSources(): List<JobSource>
+    +getSource(sourceId): JobSource
+    +updateSource(sourceId, cmd): JobSource
+    +resolveEffectiveSearchTerms(sourceId): List<String>
+  }
+
+  class JobSourceRunService {
+    +createRun(sourceId, triggerType): JobSourceRun
+    +appendDiagnostic(runId, diagnostic): void
+    +completeRun(runId, status): void
+    +listRuns(filter): Page<JobSourceRun>
+    +getRunDetail(runId): JobSourceRunDetail
+    +triggerManualSync(sourceId): JobSourceRun
+  }
+
+  class JobRawPostingService {
+    +upsertFromAdapter(runId, record): JobRawPosting
+    +saveManualUrl(cmd): SaveUrlResult
+  }
+
+  class JobNormalizationService {
+    +normalizeAndMaterialize(rawPostingId): CanonicalJob
+    +hardDedupeByStableId(raw): Optional<UUID>
+    +hardDedupeByCanonicalUrl(url): Optional<UUID>
+    +detectPossibleDuplicates(jobId): void
+  }
+
+  class JobGateRankService {
+    +evaluateGate(jobId, profile, ruleVersion): GateResult
+    +evaluateRank(jobId, profile, ruleVersion): RankResult
+    +recomputeForProfileChange(profileVersion): void
+  }
+
+  class JobCanonicalService {
+    +listInbox(query): Page<JobSummary>
+    +getJobDetail(jobId): JobDetail
+    +listNewJobsForHome(limit): List<JobSummary>
+  }
+
+  class JobDecisionService {
+    +changeStatus(jobId, toStatus, version): JobDecision
+    +overrideGate(jobId, reason, version): JobDecision
+    +listDecisions(jobId): List<JobDecision>
+  }
+
+  class JobDuplicateService {
+    +listPendingDuplicates(): List<PossibleDuplicate>
+    +confirmDuplicate(id, resolution?): MergeResult
+    +rejectDuplicate(id): void
+  }
+
+  class JobValidityService {
+    +refreshValidity(jobId): ValidityResult
+    +refreshAllDue(): void
+  }
+
+  class JobDomainEventPublisher {
+    +publishJobCreated(jobId): void
+    +publishStatusChanged(jobId, from, to): void
+    +publishGateNeedsConfirmation(jobId, dim): void
+  }
+}
+
+JobSourceRunService --> JobSourceService : searchTerms
+JobRawPostingService --> JobNormalizationService : after upsert
+JobNormalizationService --> JobGateRankService : gate then rank
+JobDecisionService --> JobDomainEventPublisher
+JobDuplicateService --> JobCanonicalService
+JobValidityService --> JobDomainEventPublisher
+
+note bottom of JobSourceService
+  searchTerms =
+  Profile.activeTargetRole.roleName
+  ∪ user override DISTINCT
+end note
+
+note bottom of JobGateRankService
+  missing expectedStartDate
+  → WORK_AUTH NEEDS_CONFIRMATION
+end note
+
+note bottom of JobDuplicateService
+  survivor = earlier first_seen_at
+  status conflict → user picks
+end note
+@enduml

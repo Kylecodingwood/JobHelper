@@ -1,0 +1,64 @@
+@startuml
+title Roadmap CRUD 服务层
+skinparam shadowing false
+hide empty methods
+
+package "roadmap.application" {
+  class RoadmapTemplateQueryService
+  class RoadmapTemplateCommandService {
+    +parseMarkdownPreview()
+    +saveUserTemplateVersion()
+  }
+  class RoadmapQueryService {
+    +getActiveRoadmap()
+    +getActionabilitySummary()
+  }
+  class RoadmapGenerationService {
+    +buildGeneratePreview()
+    +confirmGenerate()
+    +buildMergePreview()
+    +confirmMerge()
+  }
+  class RoadmapTemplateApplicationService {
+    +previewTemplateUpdate()
+    +applyTemplateUpdate()
+  }
+  class RoadmapTaskCommandService {
+    +createUserTask()
+    +completeTask()
+    +archiveTask()
+  }
+  class RoadmapEventAppendService {
+    +appendFromDomainEvent()
+  }
+  class MarkdownTemplateParser
+  class AnchorResolver {
+    +resolveGrs001()
+    +resolveStamp001()
+  }
+  class ActionabilityEngine
+  class TemplateMergeEngine
+  class DomainEventOutboxWriter
+  class DomainEventReceiptRepository
+  class ProfileAnchorPort <<port>>
+}
+
+RoadmapTemplateCommandService --> MarkdownTemplateParser
+RoadmapGenerationService --> AnchorResolver
+RoadmapGenerationService --> TemplateMergeEngine
+RoadmapGenerationService --> ProfileAnchorPort
+RoadmapTaskCommandService --> ActionabilityEngine
+RoadmapEventAppendService --> DomainEventReceiptRepository
+ActionabilityEngine --> DomainEventOutboxWriter
+
+note bottom of RoadmapGenerationService
+  first: preview then confirm create
+  recompute: SYSTEM unfinished merge only
+end note
+
+note bottom of RoadmapEventAppendService
+  CV / JOB / BEHAVIORAL
+  idempotent sourceDomain+eventId
+  no Action entity here
+end note
+@enduml

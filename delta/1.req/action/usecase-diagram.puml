@@ -1,0 +1,54 @@
+@startuml
+title Action 域用例图
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+actor 求职者 as User
+actor "Job 域" as Job
+actor "Roadmap 域" as Roadmap
+actor "CV 域" as CV
+actor "Behavioral 域" as Behavioral
+
+rectangle "Job Helper / Action" {
+  usecase "UC-ACT-001\n查看今日优先 Action\n和新职位" as UC1
+  usecase "UC-ACT-002\n从 Action 进入源对象" as UC2
+  usecase "UC-ACT-003\n根据源对象变化\n同步 Action" as UC3
+  usecase "UC-ACT-004\n置顶、完成、忽略\n或恢复 Action" as UC4
+  usecase "UC-ACT-005\n解释 Action 优先级" as UC5
+  usecase "幂等消费领域事件" as Event
+  usecase "计算可解释优先级" as Priority
+}
+
+User --> UC1
+User --> UC2
+User --> UC4
+User --> UC5
+Job --> UC3
+Roadmap --> UC3
+CV --> UC3
+Behavioral --> UC3
+
+UC3 ..> Event : <<include>>
+UC3 ..> Priority : <<include>>
+UC1 ..> Priority : <<include>>
+UC5 ..> Priority : <<include>>
+
+note right of Priority
+  deadline → blocker → user pin
+  → system suggestion；
+  无不透明总分。
+end note
+
+note bottom of UC2
+  导航不等于完成，
+  不改变 Job 状态或提交申请。
+end note
+
+note bottom of UC4
+  操作: PIN/UNPIN/COMPLETE/
+  IGNORE/RESTORE；
+  用户决定优先于系统重算；
+  AI 不能伪造用户决定。
+end note
+@enduml

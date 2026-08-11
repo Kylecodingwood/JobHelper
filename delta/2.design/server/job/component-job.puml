@@ -1,0 +1,34 @@
+@startuml
+title Job 域组件依赖
+skinparam componentStyle rectangle
+
+component "job-api\nREST /api/v1/jobs\n/job-sources" as api
+component "job-crud\n应用服务" as crud
+component "job-model\nPostgreSQL 实体" as model
+
+component "job-workflow-sync\n06:00 FreeHire+JobSpy" as sync
+component "job-workflow-gate-rank\nGate 表 + Rank 投票" as gate
+
+component "profile\n(TargetRole 只读)" as profile <<external>>
+component "infra\nOutbox 领域事件" as infra <<external>>
+component "action\n消费 Job 事件" as action <<external>>
+
+api --> crud
+crud --> model
+sync --> crud
+gate --> crud
+sync --> gate : VALID RawPosting
+crud --> profile : searchTerms
+crud --> infra : JOB_*
+infra ..> action : async
+
+note bottom of sync
+  PARTIAL_SUCCESS
+  单站点失败隔离
+end note
+
+note bottom of gate
+  missing expectedStartDate
+  → WORK_AUTH NEEDS_CONFIRMATION
+end note
+@enduml

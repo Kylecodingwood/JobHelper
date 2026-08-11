@@ -1,0 +1,31 @@
+@startuml jobs-sources-api
+title Jobs Sources API — 对齐后端
+' /job-sources + /job-source-runs；diagnostics 内嵌详情
+
+actor User
+boundary "SourcesPage" as page
+control "SourcesApiClient" as client
+entity "Backend /api/v1" as api
+
+User -> page : sync / diagnose
+page -> client
+client -> api : GET /job-sources
+api --> client : JobSourceDto[]
+
+page -> client : GET /job-source-runs
+client -> api
+api --> client : Page runs
+
+page -> client : GET /job-source-runs/{id}
+client -> api
+api --> client : detail + diagnostics
+
+page -> client : PATCH /job-sources/{id}
+client -> api
+api --> client : JobSourceDto
+
+page -> client : POST /job-source-runs
+client -> api
+api --> client : 202 QUEUED/RUNNING
+
+@enduml

@@ -1,0 +1,51 @@
+@startuml
+title Job REST API (/api/v1)
+skinparam shadowing false
+
+package "Jobs Inbox  /jobs" {
+  [GET /jobs] as ListJobs
+  [GET /jobs/{jobId}] as GetJob
+  [POST /jobs/manual-url] as ManualUrl
+  [PATCH /jobs/{jobId}/status] as PatchStatus
+  [POST /jobs/{jobId}/gate-override] as GateOverride
+  [GET /jobs/{jobId}/evidence] as Evidence
+  [GET /jobs/{jobId}/decisions] as Decisions
+  [GET /jobs/duplicates] as ListDup
+  [POST /jobs/duplicates/{id}/confirm] as ConfirmDup
+  [POST /jobs/duplicates/{id}/reject] as RejectDup
+  [POST /jobs/{jobId}/validity/check] as Validity
+  [GET /jobs/new] as NewJobs
+}
+
+package "Sources  /jobs/sources" {
+  [GET /job-sources] as ListSrc
+  [GET /job-sources/{id}] as GetSrc
+  [PATCH /job-sources/{id}] as PatchSrc
+  [GET /job-source-runs] as ListRuns
+  [GET /job-source-runs/{id}] as GetRun
+  [POST /job-source-runs] as TriggerRun
+}
+
+ListJobs --> JobSummaryDto
+GetJob --> JobDetailDto
+ManualUrl --> JobDetailDto
+Evidence --> RuleEvidenceDto
+NewJobs --> JobSummaryDto : Home FR-ACT-003
+
+PatchSrc --> JobSourceDto : effectiveSearchTerms\n= TargetRole ∪ override
+
+note right of GateOverride
+  reason 必填
+  保留原 RuleEvidence
+end note
+
+note bottom of ConfirmDup
+  survivor = 较早 first_seen
+  conflict → resolvedJobStatus
+end note
+
+note bottom of TriggerRun
+  新建 MANUAL SourceRun
+  不复用 runId
+end note
+@enduml
