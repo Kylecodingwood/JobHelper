@@ -20,16 +20,19 @@ public class RoadmapTodoService {
     private final RoadmapTodoRepository repository;
     private final RoadmapFolderService folderService;
     private final RoadmapCompanyService companyService;
+    private final RoadmapDocumentService documentService;
     private final OutboxService outboxService;
 
     public RoadmapTodoService(
             RoadmapTodoRepository repository,
             RoadmapFolderService folderService,
             RoadmapCompanyService companyService,
+            RoadmapDocumentService documentService,
             OutboxService outboxService) {
         this.repository = repository;
         this.folderService = folderService;
         this.companyService = companyService;
+        this.documentService = documentService;
         this.outboxService = outboxService;
     }
 
@@ -44,6 +47,11 @@ public class RoadmapTodoService {
         if (RoadmapFolderService.KIND_COMPANYTRACKER.equals(folder.getKind())) {
             out.put("todos", List.of());
             out.put("companies", companyService.listByFolder(folderId));
+            out.put("documents", List.of());
+        } else if (RoadmapFolderService.KIND_DOCUMENT.equals(folder.getKind())) {
+            out.put("todos", List.of());
+            out.put("companies", List.of());
+            out.put("documents", documentService.listByFolder(folderId));
         } else {
             List<Map<String, Object>> todos = repository
                     .findByFolderIdOrderByDoneAscSortOrderAscUpdatedAtDesc(folderId).stream()
@@ -51,6 +59,7 @@ public class RoadmapTodoService {
                     .toList();
             out.put("todos", todos);
             out.put("companies", List.of());
+            out.put("documents", List.of());
         }
         return out;
     }
@@ -66,6 +75,10 @@ public class RoadmapTodoService {
         if (RoadmapFolderService.KIND_COMPANYTRACKER.equals(folder.getKind())) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "FOLDER_KIND",
                     "Use company endpoints for companytracker folders");
+        }
+        if (RoadmapFolderService.KIND_DOCUMENT.equals(folder.getKind())) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "FOLDER_KIND",
+                    "Use document endpoints for document folders");
         }
         Instant now = Instant.now();
         RoadmapTodoEntity t = new RoadmapTodoEntity();

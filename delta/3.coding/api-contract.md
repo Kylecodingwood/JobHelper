@@ -22,9 +22,9 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[] }`（默认打开 todolist 夹） |
+| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[], documents[] }` |
 | GET | `/api/v1/roadmap/folders` | `{ folders[] }` |
-| POST | `/api/v1/roadmap/folders` | `{ name, kind? }` → 201；`kind`: `todolist`（默认）\|`companytracker` |
+| POST | `/api/v1/roadmap/folders` | `{ name, kind? }` → 201；`kind`: `todolist`（默认）\|`companytracker`\|`document` |
 | PATCH | `/api/v1/roadmap/folders/{folderId}` | `{ name }` 重命名（不可改 kind） |
 | DELETE | `/api/v1/roadmap/folders/{folderId}` | 204；不可删最后一个；级联删内容 |
 | POST | `/api/v1/roadmap/todos` | `{ name, folderId?, dueAt?, comment? }` → 201（仅 todolist） |
@@ -34,6 +34,9 @@
 | POST | `/api/v1/roadmap/companies` | `{ companyName, folderId?, status?, contact?, note? }` → 201（仅 companytracker） |
 | PATCH | `/api/v1/roadmap/companies/{companyId}` | 改 companyName/status/contact/note/folderId |
 | DELETE | `/api/v1/roadmap/companies/{companyId}` | 204 |
+| POST | `/api/v1/roadmap/documents` | `{ title?, folderId?, bodyHtml? }` → 201（仅 document） |
+| PATCH | `/api/v1/roadmap/documents/{documentId}` | `{ title?, bodyHtml? }` |
+| DELETE | `/api/v1/roadmap/documents/{documentId}` | 204 |
 
 **FolderDto**：`folderId`, `name`, `kind`, `itemCount`, `sortOrder`, `updatedAt`
 
@@ -42,6 +45,8 @@
 **CompanyDto**：`companyId`, `folderId`, `companyName`, `status`, `contact`, `note`, `sortOrder`, `updatedAt`
 
 **Company status**：`watching` \| `applied` \| `interview` \| `offer` \| `rejected` \| `on_hold`
+
+**DocumentDto**：`documentId`, `folderId`, `title`, `bodyHtml`（所见即所得 HTML，TEXT）, `sortOrder`, `createdAt`, `updatedAt`
 
 **已删除端点**：`generate/*`、`recompute/*`、`templates/*`、`template-updates/*`、`tasks/*`、`actionability`
 
@@ -112,13 +117,30 @@ Gate 读 `identityStatus` + `identityValidUntil` + languages（不再读 TargetR
 
 ---
 
+## LeetCode
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/v1/leetcode/problems` | `?q=&difficulty=&mastery=&review=` → `{ problems[], total }`（Hot 100 catalog） |
+| GET | `/api/v1/leetcode/problems/{problemId}` | 题目 + optional `review`；若库中无正文则拉取并写入 `statementHtml`/`examples` |
+| POST | `/api/v1/leetcode/problems/{problemId}/content/refresh` | 强制从 LeetCode 刷新正文并落库 |
+| PUT | `/api/v1/leetcode/problems/{problemId}/review` | `{ confusion*, approach?, keyCode?, mastery, nextReviewAt? }` |
+| DELETE | `/api/v1/leetcode/problems/{problemId}/review` | 204 |
+
+**mastery**：`confident` \| `partial` \| `weak`  
+**review filter**：`all` \| `reviewed` \| `unreviewed`  
+UI 全英；疑惑点 `confusion` 必填。
+
+---
+
 ## 前端调用策略
 
 | 页 | 策略 |
 |---|---|
 | Home | `/home`；折叠其余，展开再 `GET /actions` 或提高 limit |
-| Roadmap | 左文件夹（todolist / companytracker）/ 右对应表；夹可改名 |
-| Profile | PUT 兼创建；无重算面板 |
+| Roadmap | 左文件夹（todolist / companytracker / document）/ 右对应表；文档为 WYSIWYG + 自动保存 |
+| LeetCode | `/leetcode` Hot 100 列表 + review 编辑（EN） |
+| Profile | 右上角圆形入口；PUT 兼创建 |
 | Sources | 大搜索框写**全局** `PUT /job-sources/search-terms`；再按源手动/定时 run |
 | CV | 列表 + multipart 上传 PDF/DOCX；预览打 PDF URL |
 | Behavioral | Questions / Evidence / Practice 三区；反馈走本地规则 |

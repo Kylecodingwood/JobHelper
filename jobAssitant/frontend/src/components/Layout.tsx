@@ -20,8 +20,8 @@ export function Layout() {
           <NavLink to="/roadmap" className={({ isActive }) => (isActive ? 'active' : undefined)}>
             Roadmap
           </NavLink>
-          <NavLink to="/profile" className={({ isActive }) => (isActive ? 'active' : undefined)}>
-            Profile
+          <NavLink to="/leetcode" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+            LeetCode
           </NavLink>
           <NavLink to="/cv" className={({ isActive }) => (isActive ? 'active' : undefined)}>
             CV
@@ -30,7 +30,14 @@ export function Layout() {
             Behavioral
           </NavLink>
         </div>
-        <div className="nav-meta">M1 · local</div>
+        <NavLink
+          to="/profile"
+          className={({ isActive }) => `nav-avatar${isActive ? ' active' : ''}`}
+          title="Profile"
+          aria-label="Profile"
+        >
+          P
+        </NavLink>
       </nav>
       <Outlet />
     </div>

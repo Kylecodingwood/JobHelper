@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jobhelper.roadmap.application.RoadmapCompanyService;
+import com.jobhelper.roadmap.application.RoadmapDocumentService;
 import com.jobhelper.roadmap.application.RoadmapFolderService;
 import com.jobhelper.roadmap.application.RoadmapTodoService;
 
@@ -25,17 +26,20 @@ public class RoadmapController {
     private final RoadmapTodoService todoService;
     private final RoadmapFolderService folderService;
     private final RoadmapCompanyService companyService;
+    private final RoadmapDocumentService documentService;
 
     public RoadmapController(
             RoadmapTodoService todoService,
             RoadmapFolderService folderService,
-            RoadmapCompanyService companyService) {
+            RoadmapCompanyService companyService,
+            RoadmapDocumentService documentService) {
         this.todoService = todoService;
         this.folderService = folderService;
         this.companyService = companyService;
+        this.documentService = documentService;
     }
 
-    /** Folders + todos or companies for one folder. */
+    /** Folders + todos / companies / documents for one folder. */
     @GetMapping
     public Map<String, Object> list(@RequestParam(required = false) UUID folderId) {
         return todoService.list(folderId);
@@ -96,6 +100,22 @@ public class RoadmapController {
     @DeleteMapping("/companies/{companyId}")
     public ResponseEntity<Void> deleteCompany(@PathVariable UUID companyId) {
         companyService.delete(companyId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/documents")
+    public ResponseEntity<Map<String, Object>> createDocument(@RequestBody Map<String, Object> body) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(documentService.create(body));
+    }
+
+    @PatchMapping("/documents/{documentId}")
+    public Map<String, Object> patchDocument(@PathVariable UUID documentId, @RequestBody Map<String, Object> body) {
+        return documentService.patch(documentId, body);
+    }
+
+    @DeleteMapping("/documents/{documentId}")
+    public ResponseEntity<Void> deleteDocument(@PathVariable UUID documentId) {
+        documentService.delete(documentId);
         return ResponseEntity.noContent().build();
     }
 }
