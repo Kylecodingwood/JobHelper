@@ -12,6 +12,12 @@ cd jobAssitant/backend && ./mvnw spring-boot:run
 cd jobAssitant/frontend && npm install && npm run dev
 ```
 
+Or run the whole stack with Docker:
+
+```bash
+docker compose up --build
+```
+
 - Frontend: http://localhost:5173  
 - API: http://localhost:8080/api/v1  
 - Specs: [`delta/README.md`](delta/README.md) · Progress: [`delta/SRS/progress-log.md`](delta/SRS/progress-log.md)
