@@ -44,9 +44,23 @@
 |---|---|---|
 | `REVIEW_NEW_JOB` | JOB | `CANONICAL_JOB` |
 | `RESOLVE_GATE` | JOB | `CANONICAL_JOB` |
-| `COMPLETE_ROADMAP_TASK` | ROADMAP | `ROADMAP_TASK` |
+| `COMPLETE_ROADMAP_TASK` | ROADMAP | `ROADMAP_TASK`（**Home 今日优先刷新时默认 supersede**，不再占前三） |
 | `REVIEW_CV_SUGGESTIONS` | CV | `CV_REVIEW` / `CV_SUGGESTION` |
 | `COMPLETE_BEHAVIORAL_ANSWER` | BEHAVIORAL | `BEHAVIORAL_ANSWER` |
+
+### 2.2 Home「今日优先」三槽（`priorityRuleVersion=today-priority-v1`）
+
+`GET /home` 时由 `HomeTodayPriorityService` **upsert 固定 actionId 三槽**（可解释、可导航）：
+
+| 槽 | actionKind（择一） | 规则摘要 |
+|---|---|---|
+| 1 岗位动作 | `REVIEW_TODAY_JOBS` | NEW 岗位摘要 → Jobs |
+| 2 投递闭环 | `ADVANCE_TODAY_TODO` / `ADVANCE_SHORTLIST` | 未完成 Todo（优先有 due）→ 否则 Shortlist → 否则引导写 Todo |
+| 3 材料/公司 | `FOLLOW_COMPANY` / `UPLOAD_CV` / `START_COMPANYTRACKER` / `ADD_TARGET_COMPANY` | watching 公司 → 无 CV → 无 CompanyTracker 夹 → 引导加公司 |
+
+- 未 pin 的 `COMPLETE_ROADMAP_TASK`、`SYNC_JOBS` 进入 Home 时标记 `SUPERSEDED`。
+- 未 pin 的单条 `REVIEW_NEW_JOB` 降权，避免挤占前三。
+- 规则细节与契约见 [`../../3.coding/api-contract.md`](../../3.coding/api-contract.md) Home 节。
 
 **不变量**：
 1. 每个 Action 必须能追溯到一个源域、目标对象和生成原因。

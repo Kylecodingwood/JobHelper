@@ -12,16 +12,15 @@ delta/
 └── 3.coding/      # 编码阶段规范与映射
 ```
 
-## 当前进度（2026-08-09）
+## 当前进度（2026-08-25）
 
 | 阶段 | 状态 | 说明 |
 |------|------|------|
-| SRS | **v0.4 已确认** | Gate、Rank、Roadmap、CV、Action、备份与同步规则已冻结 |
-| 1.req | **门禁通过** | 六域 UC/流程/实体、跨域事件、种子模板与策展题库已同步 |
-| 2.design | **M1 完成** | 文档 + 原型 UI 基线；前端 API **已按后端对齐** |
-| 3.coding | **映射已完成** | README / specification / api-contract / 前后端 coding-plan；**无应用源码** |
-| 数据源验证 | **已完成** | 见 `../scripts/datasource/`，结果见下 |
-| 实现仓 | **未开始** | 下一步：独立前后端仓按 `3.coding` 开工 |
+| SRS | **v0.4 + Pivot 增补** | 见 `SRS/SRS.md` §0.1；细节以 `progress-log.md` 为准 |
+| 1.req | **已回写增补** | Roadmap 多夹实体；Action 今日优先；新增 `leetcode/` |
+| 2.design | **已回写增补** | roadmap/home/nav；新增 leetcode 前后端设计 |
+| 3.coding | **契约已更新** | `api-contract.md` + coding-plan |
+| 实现仓 | **`jobAssitant/` 已落地** | 与上述增补对齐 |
 
 ### 数据源验证结论
 

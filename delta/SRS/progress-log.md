@@ -1,3 +1,20 @@
+## Pivot 2026-08-25 · Roadmap 多夹 / Document / 今日优先 / LeetCode
+
+文档与实现已对齐（此前仅 `api-contract` 部分更新，1.req/2.design 已补全）：
+
+| 能力 | 要点 | 关键文档 |
+|---|---|---|
+| Roadmap 多文件夹 | kind=`todolist`\|`companytracker`\|`document`；级联删；至少一夹 | `1.req/roadmap/entity.md`；`2.design/server/roadmap/*` |
+| CompanyTracker | status 六态；Home 第三槽可跟进 | 同上 |
+| Document + TipTap | `bodyHtml`；防抖自动保存；禁止保存回灌编辑器 | `2.design/frontend/roadmap/*`；`DocumentEditor` |
+| Home 今日优先 v1 | 三固定槽：审岗→推进→材料/公司；supersede 旧 Roadmap Action | `1.req/action/entity.md` §2.2；`HomeTodayPriorityService` |
+| LeetCode | Hot 100、review、题面 GraphQL 缓存；Nav `/leetcode` | `1.req/leetcode/*`；`2.design/**/leetcode/*` |
+| Nav | Profile→头像 P；Sources/CV/Behavioral/LeetCode 入主导航 | `2.design/frontend/pages.md`；`ui-baseline.md` |
+
+Flyway：`V13`–`V17`。契约：`3.coding/api-contract.md`。
+
+---
+
 ## Pivot 2026-08-09 · CV / Behavioral
 
 - CV：DOCX 上传 → PDF 管理（列表/预览/删除）；无抽文本产品能力；实现用 POI+PDFBox 生成预览 PDF（非排版级 Word 渲染）
@@ -15,10 +32,10 @@
 
 | 项目 | 内容 |
 |---|---|
-| 日志版本 | 2026-08-09 |
-| 对应需求 | [`SRS.md`](SRS.md) v0.4 |
-| 产品阶段 | M1（Personal-first / Local-first / Ireland） |
-| 文档状态 | **1.req → 2.design → 3.coding 已完成；应用仓 M1 API/契约对齐已落地（duplicates/依赖/模板/备份 zip/预览持久化/FE 合同页）** |
+| 日志版本 | 2026-08-25 |
+| 对应需求 | [`SRS.md`](SRS.md) v0.4 + 本日志 Pivot 增补 |
+| 产品阶段 | M1 + 本地增补（Document / LeetCode / 今日优先） |
+| 文档状态 | **1.req / 2.design / 3.coding 已按 2026-08-25 增补回写**；实现仓 `jobAssitant/` 已落地 |
 
 ---
 
@@ -110,9 +127,11 @@ SRS v0.4 ──► 1.req（门禁通过）
 | Home | 今日优先 Action + New Job 条带；为何优先；pin/complete/ignore；导航源对象 |
 | Jobs Inbox | 高密度列表 + 详情；Gate/Rank 证据；状态决定；Gate 覆盖；去重；保存 URL |
 | Jobs Sources | FreeHire / JobSpy 来源；手动同步；SourceRun 诊断 |
-| Roadmap | 单页时间线；模板/生成/重算/系统更新（preview→confirm）；任务推进 |
+| Roadmap | 多文件夹 TodoList / CompanyTracker / Document（TipTap + 自动保存） |
+| LeetCode | `/leetcode` Hot 100 + review + 题面缓存 |
+| Home | 今日优先三槽 `today-priority-v1`；最多 3 条默认展示 |
 | 备份 | 周日 03:00 自动（保留 4）+ 手动导出 + 恢复预览 |
-| UI | 对齐 `2.design/prototype/`（墨绿色纸感、Nav、分栏密度） |
+| UI | Nav 含 Sources/LeetCode/CV/Behavioral；Profile 头像入口 |
 
 ### 4.2 系统能力（非菜单）
 

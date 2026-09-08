@@ -17,6 +17,8 @@
 
 ## UC-ACT-001 查看今日优先 Action 和新职位
 
+- **增补（2026-08）**：进入 Home 时服务端按 `today-priority-v1` **刷新三固定槽**（审岗 / 投递闭环 / 材料·公司），详见 [`entity.md`](entity.md) §2.2 与 `api-contract` Home 节。默认仍最多展示 3 条，其余折叠。
+
 - **优先级**：P0
 - **参与者**：求职者（主）、Job/Roadmap/CV/Behavioral 域
 - **触发条件**：用户打开 Home，或主动刷新。

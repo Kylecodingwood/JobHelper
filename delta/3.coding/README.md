@@ -3,11 +3,9 @@
 
 | 项      | 内容                                                                                                                                |
 | ------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| 状态     | **M1 映射与横切规约已写入**（2026-08-09）                                                                                                     |
-| 技术栈    | `[../2.design/adr/tech-stack.md](../2.design/adr/tech-stack.md)`                                                                  |
-| UI 基线  | `[../2.design/frontend/ui-baseline.md](../2.design/frontend/ui-baseline.md)` + `[../2.design/prototype/](../2.design/prototype/)` |
-| API 契约 | **以后端为准**；前端 `api.md` 已对齐（2026-08-09）                                                                                             |
-| 本目录性质  | **实现映射文档**；应用源码在独立前后端仓生成，不落在 `delta/`                                                                                             |
+| 状态     | **已含 2026-08-25 增补**（Roadmap 多夹 / Document / 今日优先 / LeetCode） |
+| API 契约 | [`api-contract.md`](api-contract.md)（与 `jobAssitant/` 实现对齐） |
+| 本目录性质  | **实现映射文档**；可运行代码在 `jobAssitant/` |
 
 
 ## 文档清单
@@ -30,11 +28,14 @@
 
 | 设计目录               | Java 包（建议）                                                      | 职责                     |
 | ------------------ | --------------------------------------------------------------- | ---------------------- |
-| `server/profile/*` | `…profile.api` / `.application` / `.domain` / `.infrastructure` | REST、应用服务、实体、Outbox/调度 |
-| `server/roadmap/*` | `…roadmap.*`                                                    | 同上                     |
-| `server/job/*`     | `…job.*` + `…job.adapter.freehire` / `…job.adapter.jobspy`      | 含 Source Adapter       |
-| `server/action/*`  | `…action.*`                                                     | Home BFF + Action 投影   |
-| 跨域                 | `…shared.outbox` / `…shared.web`                                | Outbox、统一错误体、分页        |
+| `server/profile/*` | `…profile.*` | REST、应用服务、实体 |
+| `server/roadmap/*` | `…roadmap.*` | 多夹 Todo/Company/Document |
+| `server/job/*` | `…job.*` + adapters | FreeHire / JobSpy |
+| `server/action/*` | `…action.*` | Home BFF + `today-priority-v1` |
+| `server/cv/*` | `…cv.*` | 文件管理 |
+| `server/behavioral/*` | `…behavioral.*` | 本地域 |
+| `server/leetcode/*` | `…leetcode.*` | Hot 100 + review |
+| 跨域 | `…shared.outbox` / `…shared.web` | Outbox、统一错误体 |
 
 
 域内分层与 `component-*.puml` 一致：`api → crud/application → model → DB`；workflow 可为 application 内编排或独立服务类。

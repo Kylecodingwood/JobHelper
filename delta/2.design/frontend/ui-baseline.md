@@ -17,23 +17,23 @@
 ## 2. 全局壳（所有已登录页）
 
 ```text
-┌──────────────────────────────────────────────┐
-│ Nav: Job Helper | Home Jobs Roadmap Profile │  sticky · 52px
-│              CV/Behavioral「即将推出」         │
-├──────────────────────────────────────────────┤
-│ PageTopBar（48px）· 页标题 / 主操作           │
-├──────────────────────────────────────────────┤
-│                  页面主内容                    │
-└──────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ Nav: Job Helper | Home Jobs Sources Roadmap LeetCode …  │ sticky
+│                                    [P] Profile 圆形入口   │
+├──────────────────────────────────────────────────────────┤
+│ PageTopBar（48px）· 页标题 / 主操作                       │
+├──────────────────────────────────────────────────────────┤
+│                  页面主内容                                │
+└──────────────────────────────────────────────────────────┘
 ```
 
 | 元素 | 规则 |
 |---|---|
-| 品牌 | 文案 **Job Helper**（Helper 用品牌绿）；Nav 左侧，非小字 eyebrow |
-| 主导航 | `Home` / `Jobs` / `Roadmap` / `Profile`；当前项用品牌软底高亮 |
-| 占位 | CV、Behavioral：灰色不可点「即将推出」 |
-| 背景 | 固定纸感渐变（绿/蓝径向光 + 浅绿灰底），非纯白扁平 |
-| 字体 | UI：`Figtree`；标题/品牌：`Fraunces`（实现可用等价 webfont，禁止默认 Inter/Roboto/Arial 栈作为主字体） |
+| 品牌 | 文案 **Job Helper**（Helper 用品牌绿）；Nav 左侧 |
+| 主导航 | `Home` / `Jobs` / `Sources` / `Roadmap` / `LeetCode` / `CV` / `Behavioral`；当前项软底高亮 |
+| Profile | **右上角圆形「P」**，不占用主导航文字项 |
+| 背景 | 纸感渐变（绿/蓝径向光 + 浅绿灰底） |
+| 字体 | UI：`Figtree`；标题/品牌：`Fraunces` |
 
 ## 3. 分页面布局（与原型文件对齐）
 
@@ -42,8 +42,9 @@
 | `/` | `index.html` | 顶栏 + 可选降级 Banner + **居中主列 max 960px**：今日优先 Action 卡片栈 → 阻塞折叠 → New Job 网格；「为何优先」右侧抽屉 |
 | `/jobs` | `jobs.html` | 顶栏（保存 URL、来源链）+ 筛选条 + **左右分栏**（列表 ~55% / 详情 ~45%）；行高 52px；详情含 Gate 四维 + Rank 五因素（无综合分） |
 | `/jobs/sources` | `jobs-sources.html` | 返回 Inbox + Source 横向卡片条 + 筛选 + **左右分栏**（运行列表 / 指标·诊断） |
-| `/roadmap` | `roadmap.html` | 顶栏小按钮（模板/生成/重算/系统更新）+ 可执行性 strip + **阶段时间线** + Unscheduled 底区；详情/模板用右侧抽屉；生成/重算用居中对话框 |
-| `/profile` | `profile.html` | 顶栏保存 + **表单列 ~65% / 侧栏 ~35%**（重算 + 数据管理）；保存走影响预览对话框 |
+| `/roadmap` | `roadmap.html`（结构已演进） | **左文件夹 + 右内容**：todolist 表 / companytracker 表 / document（列表+TipTap）；原型时间线仅为历史参考 |
+| `/leetcode` | （无静态原型） | Hot 100 列表 + 题面 + Review（EN） |
+| `/profile` | `profile.html` | 表单；入口为 Nav 右上角头像 |
 | onboarding | `profile-onboarding.html` | 无完整主导航；品牌标题 + 四步条 + 居中 max 640px 向导 |
 
 ## 4. 视觉令牌（摘自原型，实现仓建 CSS variables）

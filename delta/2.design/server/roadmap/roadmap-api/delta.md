@@ -1,49 +1,27 @@
-# roadmap-api（Pivot）
+# roadmap-api（Pivot 2026-08）
 
-独立 Notion 式待办。无模板 / 生成 / 重算 / 依赖。
+多文件夹 + 三类内容。权威契约：[`../../../../3.coding/api-contract.md`](../../../../3.coding/api-contract.md) Roadmap 节。
 
 ## 端点
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/v1/roadmap` | `{ "todos": [ TodoDto ] }` |
-| POST | `/api/v1/roadmap/todos` | 创建 |
-| PATCH | `/api/v1/roadmap/todos/{todoId}` | 更新字段 |
-| DELETE | `/api/v1/roadmap/todos/{todoId}` | 删除 → 204 |
-| POST | `/api/v1/roadmap/todos/{todoId}/toggle` | checkbox 完成翻转 |
+| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[], documents[] }`（按 kind 只填对应数组） |
+| GET | `/api/v1/roadmap/folders` | `{ folders[] }` |
+| POST | `/api/v1/roadmap/folders` | `{ name, kind? }` → 201；默认 kind=`todolist` |
+| PATCH | `/api/v1/roadmap/folders/{folderId}` | `{ name }`；**不可改 kind** |
+| DELETE | `/api/v1/roadmap/folders/{folderId}` | 204；不可删最后一个；级联内容 |
+| POST/PATCH/DELETE/toggle | `/api/v1/roadmap/todos…` | 仅 todolist 夹 |
+| POST/PATCH/DELETE | `/api/v1/roadmap/companies…` | 仅 companytracker 夹 |
+| POST/PATCH/DELETE | `/api/v1/roadmap/documents…` | 仅 document 夹 |
 
-### TodoDto
+## 校验
 
-```json
-{
-  "todoId": "uuid",
-  "name": "搭好 LinkedIn (ireland)",
-  "dueAt": "2026-09-01T00:00:00Z",
-  "comment": "experience; skills; github",
-  "done": false,
-  "sortOrder": 0,
-  "updatedAt": "2026-08-09T10:00:00Z"
-}
-```
-
-### POST body
-
-```json
-{ "name": "CV (ireland)", "dueAt": null, "comment": null }
-```
-
-### PATCH body
-
-```json
-{ "name": "…", "dueAt": "…", "comment": "…", "done": true }
-```
-
-## 错误
-
-| code | HTTP |
-|---|---|
-| `TODO_NOT_FOUND` | 404 |
-| `VALIDATION_ERROR` | 400（name 空） |
+| code | HTTP | 何时 |
+|---|---|---|
+| `FOLDER_KIND` | 400 | 在错误 kind 的夹上写错资源 |
+| `VALIDATION_ERROR` | 400 | name/title 空等 |
+| `TODO_NOT_FOUND` / `DOCUMENT_NOT_FOUND` / … | 404 | |
 
 ## 废止
 

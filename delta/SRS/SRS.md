@@ -10,13 +10,21 @@
 | 主要地区 | Ireland，可配置学校、时间线、地点与目标岗位 |
 | 文档语言 | 中文为主，领域名、接口术语和求职材料保留英文 |
 | 权威范围 | 本文是产品需求的单一事实来源；`delta/1.req/` 负责按域细化与追踪 |
-| 进度日志 | [`progress-log.md`](progress-log.md)（2026-08-09：M1 文档完成范围与待实现项） |
+| 进度日志 | [`progress-log.md`](progress-log.md)（含 **2026-08-25** Roadmap 多夹 / Document / 今日优先 / LeetCode 增补） |
 
 ### 0.1 已确认决策与设计期 TBD
 
+**Pivot 2026-08-25（覆盖 Roadmap / Home / 导航 / 新域）：**
+
+- Roadmap：**多文件夹**；`kind` = todolist \| companytracker \| document；CompanyTracker 六态；Document 为 TipTap `bodyHtml` + 自动保存。  
+- Home：进入时刷新 **今日优先三槽**（`today-priority-v1`：审岗 → 投递闭环 → 材料/公司）。  
+- LeetCode：独立 `/leetcode` Hot 100 + review + 题面缓存（EN UI）。  
+- Nav：Sources/CV/Behavioral/LeetCode 入主导航；Profile 为右上角「P」头像。  
+- 细节权威：`progress-log.md` Pivot 表 + `3.coding/api-contract.md`。
+
 **Pivot 2026-08-09（覆盖上表 3、5 及相关 FR）：**
 
-3′. Roadmap 为**独立 Notion 式待办**（name / due / comment / checkbox），与 Profile **解耦**；废止系统模板、GRS 锚点、依赖图、Profile→Roadmap 重算 merge。  
+3′. Roadmap 为**独立 Notion 式待办**（name / due / comment / checkbox），与 Profile **解耦**；废止系统模板、GRS 锚点、依赖图、Profile→Roadmap 重算 merge。（**已被 2026-08-25 多夹模型扩展**）  
 5′. Profile 为**用户画像**（国籍、身份含原工作许可、目标国家、教育、工作经验、求职目标、skills、多语言），供后续 AI prompt；**废止 TargetRole**；搜索词由用户在 **Job Source** 自管（大搜索框），首次同步前必填。  
 Home：今日优先默认展示 **3** 条，其余折叠展开。  
 Sources 页：**上下布局** + LinkedIn 风格搜索框。

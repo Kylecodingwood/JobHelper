@@ -1,10 +1,19 @@
 # Roadmap 用例说明
 
-- 权威需求：[../../SRS/SRS.md](../../SRS/SRS.md)
-- 范围：本地、确定性、可追溯的个性化 Roadmap；Action 优先级由 Action 域负责
-- 对应需求：`FR-RDM-001`～`FR-RDM-012`；Action 相关 FR 经 `UC-RDM-006` 事件桥接至 Action 域
+> **Pivot 2026-08**：产品已改为「多文件夹 Todo / CompanyTracker / Document」。下文 UC-RDM-001～007（模板/生成/依赖）为**历史文档**，不再实现。现行实体见 [`entity.md`](entity.md)；API 见 [`../../3.coding/api-contract.md`](../../3.coding/api-contract.md)。
 
-## 用例索引
+## 现行用例（摘要）
+
+| 编号 | 名称 | 说明 |
+|---|---|---|
+| UC-RDM-F01 | 管理文件夹 | 创建（选 kind）/ 重命名 / 删除（不可删最后一个；级联内容） |
+| UC-RDM-F02 | TodoList | 勾选、改 name/due/comment；防抖+失焦自动保存 |
+| UC-RDM-F03 | CompanyTracker | 公司行 + status 枚举 + contact/note |
+| UC-RDM-F04 | Document | 文档列表 + 标题 + TipTap HTML 正文；自动保存；切换文档才重置编辑器 |
+
+---
+
+## 历史用例索引（已废止实现）
 
 | 编号 | 名称 | 优先级 | 主要参与者 | 关联 FR |
 |---|---|---|---|---|

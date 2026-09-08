@@ -19,6 +19,23 @@
 
 ## Roadmap
 
+> **现行（2026-08）**：多文件夹 Todo / Company / Document。旧 UC-RDM-001～007（模板/生成）废止实现，见 [`roadmap/entity.md`](roadmap/entity.md)、[`roadmap/usecase-desc.md`](roadmap/usecase-desc.md) 文首。
+
+| UC | 主要实体 | 设计/契约 |
+|---|---|---|
+| UC-RDM-F01 管理文件夹 | RoadmapFolder | `2.design/server/roadmap/*`；`api-contract` |
+| UC-RDM-F02 TodoList | RoadmapTodo | 同上 |
+| UC-RDM-F03 CompanyTracker | RoadmapCompany | 同上 |
+| UC-RDM-F04 Document | RoadmapDocument | 同上 + TipTap FE |
+
+## LeetCode
+
+| UC | 主要实体 | 设计/契约 |
+|---|---|---|
+| UC-LC-001～004 | LeetCodeProblem、LeetCodeReview | [`leetcode/`](leetcode/)；`2.design/**/leetcode/*` |
+
+## Roadmap（历史索引 · 已废止）
+
 | UC | FR | Workflow | 主要实体 |
 |---|---|---|---|
 | UC-RDM-001 管理 Roadmap Template | FR-RDM-001、002、007、009、010 | [Roadmap workflow](roadmap/workflow-desc.md) | RoadmapTemplate、RoadmapTemplateVersion、TemplateTaskDefinition |
@@ -29,7 +46,7 @@
 | UC-RDM-006 查看任务可执行性并触发 Action 事件 | FR-RDM-006（事件桥接至 Action 域） | 同上 | RoadmapTask |
 | UC-RDM-007 应用系统模板更新 | FR-RDM-007 | 同上 | TemplateApplication |
 
-种子模板见 [`roadmap/system-template-v1.md`](roadmap/system-template-v1.md)；Markdown 语法见 [`roadmap/markdown-template-spec.md`](roadmap/markdown-template-spec.md)。
+种子模板见 [`roadmap/system-template-v1.md`](roadmap/system-template-v1.md)；Markdown 语法见 [`roadmap/markdown-template-spec.md`](roadmap/markdown-template-spec.md)。（历史）
 
 ## Job
 

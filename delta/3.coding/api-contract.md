@@ -1,20 +1,22 @@
-# API 契约冻结（Pivot 2026-08-09）
+# API 契约冻结（Pivot 2026-08-09 · 增补 2026-08-25）
 
 | 项 | 内容 |
 |---|---|
-| 冻结日 | 2026-08-09；增补 **CV 文件管理** + **Behavioral 完整本地域**（AI Port 未实现） |
+| 冻结日 | 2026-08-09；增补 CV / Behavioral；**再增补** Roadmap 多夹（Company/Document）、Home `today-priority-v1`、LeetCode Hot 100 |
 | 真相源 | 本文件 + 下列 `2.design` api/model |
 | 前版 | 系统模板 / GRS / Profile→Roadmap 重算 / TargetRole→searchTerms **已废止** |
 
 ## 对齐规则
 
-1. Roadmap：**独立待办**，不依赖 Profile；CRUD + checkbox 完成  
-2. Profile：**用户画像**（后续 AI prompt 基座）；无 TargetRole；身份含原 Work Auth  
-3. Sources：搜索词**仅**用户在 Source 上填写；首次同步前必填  
-4. Home：`GET /home` 默认 `actionLimit=3`；其余折叠展开  
-5. 资源名：`/job-sources`、`/job-source-runs`；Roadmap 单数 `/roadmap`  
-6. **CV**：PDF / DOCX 原样上传；DOCX 前端渲染预览；`/file` 打开原文件；无抽文本、无 Review   
-7. **Behavioral**：题库 + STAR Evidence + 答案版本 + 本地反馈；AI 仅 Port，默认 `AI_NOT_ENABLED`
+1. Roadmap：**多文件夹**；`kind` ∈ todolist / companytracker / document；内容分表 CRUD；前端防抖自动保存  
+2. Document：`bodyHtml` 为 TipTap HTML；**保存回写不得重置编辑器**（仅切换 `documentId` 时 `setContent`）  
+3. Profile：**用户画像**；无 TargetRole；身份含原 Work Auth  
+4. Sources：搜索词**仅**用户在 Source 上填写；首次同步前必填  
+5. Home：`GET /home` 默认 `actionLimit=3`；进入时刷新 **今日优先三槽**（`today-priority-v1`）  
+6. 资源名：`/job-sources`、`/job-source-runs`；Roadmap 单数 `/roadmap`  
+7. **CV**：PDF / DOCX 原样上传；无抽文本产品能力  
+8. **Behavioral**：题库 + Evidence + 本地反馈；AI Port → `AI_NOT_ENABLED`  
+9. **LeetCode**：独立域 `/leetcode`；Hot 100 + review；题面 GraphQL 缓存 
 
 ---
 
@@ -138,9 +140,10 @@ UI 全英；疑惑点 `confusion` 必填。
 | 页 | 策略 |
 |---|---|
 | Home | `/home`；折叠其余，展开再 `GET /actions` 或提高 limit |
-| Roadmap | 左文件夹（todolist / companytracker / document）/ 右对应表；文档为 WYSIWYG + 自动保存 |
-| LeetCode | `/leetcode` Hot 100 列表 + review 编辑（EN） |
-| Profile | 右上角圆形入口；PUT 兼创建 |
+| Roadmap | 左文件夹（todolist / companytracker / document）/ 右对应表或 TipTap；字段 **~700ms 防抖 + blur + pagehide keepalive** 自动保存；Document 保存后不回灌编辑器 |
+| LeetCode | `/leetcode` Hot 100 列表 + review 编辑（EN）；题面懒加载缓存 |
+| Profile | 右上角圆形「P」入口；PUT 兼创建 |
+| Nav | Home / Jobs / Sources / Roadmap / LeetCode / CV / Behavioral；无「M1 · local」角标 |
 | Sources | 大搜索框写**全局** `PUT /job-sources/search-terms`；再按源手动/定时 run |
 | CV | 列表 + multipart 上传 PDF/DOCX；预览打 PDF URL |
 | Behavioral | Questions / Evidence / Practice 三区；反馈走本地规则 |
