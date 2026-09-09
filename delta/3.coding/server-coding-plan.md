@@ -1,5 +1,7 @@
 # 后端编码计划
 
+> **状态 2026-09-08**：M1 域已实现（Flyway V17）；收尾见 [`../SRS/progress-log.md`](../SRS/progress-log.md) §2.2。
+
 ## 1. 工程骨架
 
 - Spring Boot 3.x、Java 17+、PostgreSQL、Flyway  

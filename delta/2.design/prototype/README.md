@@ -22,7 +22,7 @@ cd delta/2.design/prototype && python3 -m http.server 8765
 | `index.html` | `/` | 居中 960 主列；Action 栈 + New Job；为何优先抽屉 |
 | `jobs.html` | `/jobs` | 筛选条 + 左列表右详情；52px 行；Gate/Rank 证据 |
 | `jobs-sources.html` | `/jobs/sources` | Source 条 + 运行列表/详情分栏 |
-| `roadmap.html` | `/roadmap` | 工具小按钮 + strip + 阶段时间线 + Unscheduled |
+| `roadmap.html` | `/roadmap` | **历史**：时间线布局；**现行**见 [`../frontend/roadmap/roadmap/page.md`](../frontend/roadmap/roadmap/page.md)（左夹右表/Document） |
 | `profile.html` | `/profile` | 表单 + 右侧重算/备份 |
 | `profile-onboarding.html` | `/profile?mode=onboarding` | 品牌标题 + 四步向导 |
 

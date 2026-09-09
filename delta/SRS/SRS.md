@@ -4,13 +4,13 @@
 
 | 项目 | 内容 |
 |---|---|
-| 文档状态 | v0.4 — Requirement 门禁通过；设计与 coding 映射已完成，可生成应用代码 |
+| 文档状态 | v0.4 + Pivot 增补；**实现进度见 [`progress-log.md`](progress-log.md)**；API 以 [`../3.coding/api-contract.md`](../3.coding/api-contract.md) 为准 |
 | 版本 | 0.4 |
 | 产品阶段 | Personal-first / Local-first |
 | 主要地区 | Ireland，可配置学校、时间线、地点与目标岗位 |
 | 文档语言 | 中文为主，领域名、接口术语和求职材料保留英文 |
 | 权威范围 | 本文是产品需求的单一事实来源；`delta/1.req/` 负责按域细化与追踪 |
-| 进度日志 | [`progress-log.md`](progress-log.md)（含 **2026-08-25** Roadmap 多夹 / Document / 今日优先 / LeetCode 增补） |
+| 进度日志 | [`progress-log.md`](progress-log.md)（**2026-09-08** 与代码对齐；含 Docker / Roadmap 多夹 / LeetCode 等 Pivot） |
 
 ### 0.1 已确认决策与设计期 TBD
 
@@ -29,14 +29,14 @@
 Home：今日优先默认展示 **3** 条，其余折叠展开。  
 Sources 页：**上下布局** + LinkedIn 风格搜索框。
 
-2026-07-30 已确认（含 Requirement 冻结轮；其中 3、5 已被上列 Pivot 覆盖）：
+2026-07-30 已确认（**条目 3、5 已被 Pivot §0.1 取代**；正文保留作历史 FR 索引）：
 
 1. Gate 是清洗后的硬资格判断；失败岗位保留、默认隐藏并允许用户覆盖；缺 `expectedStartDate` 时工作授权维度为 `NEEDS_CONFIRMATION`，不自动推导入职日。
 2. Rank 对五项因素分别给出正/中/负证据后按透明投票聚合：≥3 正且无负=`High`；≥2 负=`Low`；其余=`Medium`。Shortlist 只由用户确认。
-3. Roadmap 使用版本化系统模板（含 `system-template-v1` 种子）+ 结构化 Markdown 导入 + 领域事件追加任务；招聘季锚点为毕业日前最近的 9 月 1 日；首次与重算均先预览确认；重算只更新系统生成且未完成的任务。
-4. Home Action 由 Action 域唯一拥有；Roadmap 只维护 `RoadmapTask` 并发布事件。Action 状态为 `OPEN/BLOCKED/COMPLETED/IGNORED/STALE`（无 `IN_PROGRESS`）。
-5. Profile 增加独立 `LanguageProficiency`；搜索词默认来自启用中的 `TargetRole`，用户可覆盖。
-6. CV/Behavioral：本地确定性检查始终可用；外部 AI / Cursor Skill/SDK 为可选增强；统一全局 AI Consent Registry。
+3. ~~Roadmap 系统模板 / GRS 锚点 / 生成重算~~ → **Pivot：多文件夹 Todo/Company/Document**（见 `progress-log`）。
+4. Home Action 由 Action 域唯一拥有。Action 状态为 `OPEN/BLOCKED/COMPLETED/IGNORED/STALE`（无 `IN_PROGRESS`）。
+5. ~~TargetRole 驱动搜索词~~ → **Pivot：用户全局 searchTerms**；Profile 含 `LanguageProficiency`。
+6. CV/Behavioral：本地域已落地；外部 AI 为可选增强；统一全局 AI Consent Registry。
 7. 数据无自动过期；每周本地备份 + 手动完整 ZIP 导出 + 恢复前影响预览；敏感对象级联硬删除。
 8. JobSpy 全站点默认尝试；站点失败只进入 SourceRun 诊断；重复职位确认时保留较早 Job，冲突由用户选择。
 

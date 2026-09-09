@@ -1,5 +1,7 @@
 # 前端编码计划
 
+> **状态 2026-09-08**：8 页已实现；收尾见 [`../SRS/progress-log.md`](../SRS/progress-log.md) §2.2。
+
 ## 1. 工程骨架
 
 - Vite + React + TypeScript + React Router  

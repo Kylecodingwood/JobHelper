@@ -31,7 +31,10 @@ docker compose up --build
 | `jobAssitant/frontend/` | Vite React UI (prototype-aligned) |
 | `add.md` | Forward-looking notes (e.g. Company-forward) |
 
-## M1 slice (current)
+## M1 status (2026-09-08)
 
-Profile create/update · Home feed · Actions decisions · Jobs list/detail/manual-url/status · Roadmap 404 stub · Sources stubs.  
-Not yet: JobSpy/FreeHire sync, Gate/Rank, Roadmap generate, Outbox, backups scheduler.
+**Implemented:** Profile · Home (today-priority-v1) · Jobs (Gate/Rank/status) · Sources (FreeHire + JobSpy) · Roadmap (multi-folder Todo/Company/Document) · LeetCode · CV files · Behavioral local domain · scheduled sync/backup · Docker Compose.
+
+**Remaining:** tests/CI · full optimistic locking · Outbox hardening · remove legacy Roadmap generate code.
+
+Details: [`delta/SRS/progress-log.md`](delta/SRS/progress-log.md) · API: [`delta/3.coding/api-contract.md`](delta/3.coding/api-contract.md)

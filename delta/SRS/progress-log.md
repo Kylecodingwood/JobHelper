@@ -1,185 +1,159 @@
-## Pivot 2026-08-25 · Roadmap 多夹 / Document / 今日优先 / LeetCode
+## Pivot 2026-09-08 · Docker Compose
 
-文档与实现已对齐（此前仅 `api-contract` 部分更新，1.req/2.design 已补全）：
+| 能力 | 要点 | 关键文档 |
+|---|---|---|
+| 本地一键栈 | `docker compose up --build` → db + backend + frontend | 根 `README.md`；`docker-compose.yaml` |
+| 前端生产态 | Vite build + nginx；`/api` 反代 backend | `jobAssitant/frontend/Dockerfile`、`nginx.conf` |
+
+---
+
+## Pivot 2026-08-25 · Roadmap 多夹 / Document / 今日优先 / LeetCode
 
 | 能力 | 要点 | 关键文档 |
 |---|---|---|
 | Roadmap 多文件夹 | kind=`todolist`\|`companytracker`\|`document`；级联删；至少一夹 | `1.req/roadmap/entity.md`；`2.design/server/roadmap/*` |
 | CompanyTracker | status 六态；Home 第三槽可跟进 | 同上 |
-| Document + TipTap | `bodyHtml`；防抖自动保存；禁止保存回灌编辑器 | `2.design/frontend/roadmap/*`；`DocumentEditor` |
-| Home 今日优先 v1 | 三固定槽：审岗→推进→材料/公司；supersede 旧 Roadmap Action | `1.req/action/entity.md` §2.2；`HomeTodayPriorityService` |
-| LeetCode | Hot 100、review、题面 GraphQL 缓存；Nav `/leetcode` | `1.req/leetcode/*`；`2.design/**/leetcode/*` |
-| Nav | Profile→头像 P；Sources/CV/Behavioral/LeetCode 入主导航 | `2.design/frontend/pages.md`；`ui-baseline.md` |
+| Document + TipTap | `bodyHtml`；防抖自动保存；禁止保存回灌编辑器 | `2.design/frontend/roadmap/*` |
+| Home 今日优先 v1 | 三固定槽：审岗→推进→材料/公司；supersede 旧 Roadmap Action | `1.req/action/entity.md` §2.2 |
+| LeetCode | Hot 100、review、题面 GraphQL 缓存；Nav `/leetcode` | `1.req/leetcode/*` |
+| Nav | Profile→头像 P；Sources/CV/Behavioral/LeetCode 入主导航 | `2.design/frontend/pages.md` |
 
 Flyway：`V13`–`V17`。契约：`3.coding/api-contract.md`。
 
 ---
 
-## Pivot 2026-08-09 · CV / Behavioral
+## Pivot 2026-08-09 · CV / Behavioral / Persona / Sources
 
-- CV：DOCX 上传 → PDF 管理（列表/预览/删除）；无抽文本产品能力；实现用 POI+PDFBox 生成预览 PDF（非排版级 Word 渲染）
-- Behavioral：完整本地域（题库/Evidence/答案/本地反馈）；AI 仅 Port → `501 AI_NOT_ENABLED`
-- 代码：`V7__cv_behavioral.sql` + `/cv` `/behavioral` 前后端已落地
+- **CV**：PDF/DOCX 上传、列表/预览/删除；无抽文本产品能力（`V7`、`V10`）
+- **Behavioral**：题库 + Evidence + 答案 + 本地反馈；AI Port → `501 AI_NOT_ENABLED`
+- **Roadmap**：独立 Notion 式待办 → 后扩展为多夹（见上）
+- **Profile**：画像基座；废止 TargetRole；身份含原 Work Auth
+- **Sources**：用户自管全局 `searchTerms`；首次同步前必填
 
-## Pivot 2026-08-09
-
-- Roadmap → 独立 Notion 待办（name/due/comment/checkbox），去模板/依赖/重算
-- Profile → 画像基座；去 TargetRole；身份合并 Work Auth；多语言/skills/经验
-- Sources → 用户自管 searchTerms + 大搜索框；上下布局；首次同步必填
-- Home → 默认 3 条优先，其余折叠展开
+---
 
 # Job Helper — 进度与实现范围日志
 
 | 项目 | 内容 |
 |---|---|
-| 日志版本 | 2026-08-25 |
+| 日志版本 | **2026-09-08** |
 | 对应需求 | [`SRS.md`](SRS.md) v0.4 + 本日志 Pivot 增补 |
-| 产品阶段 | M1 + 本地增补（Document / LeetCode / 今日优先） |
-| 文档状态 | **1.req / 2.design / 3.coding 已按 2026-08-25 增补回写**；实现仓 `jobAssitant/` 已落地 |
+| 产品阶段 | M1 主功能已可本地日常使用；收尾项见 §2 |
+| **进度真相源** | **本文件 Pivot 表 + [`../3.coding/api-contract.md`](../3.coding/api-contract.md)** |
+| 实现仓 | `jobAssitant/backend` + `jobAssitant/frontend`（同仓） |
 
 ---
 
-## 1. 当前能否直接生成代码？
+## 1. 当前阶段（2026-09-08）
 
-**可以开始生成应用代码。**
+**Delta 文档阶段已完成；M1 应用主体已实现。**
 
-Delta 三阶段文档门禁对 M1 已齐：
-
-| 阶段 | 状态 | 含义 |
+| 阶段 | 状态 | 说明 |
 |---|---|---|
-| 1 · Requirement（SRS + `1.req`） | ✅ 完成 | 需求与用例可追溯 |
-| 2 · Design（`2.design`） | ✅ 完成 | 前后端设计、原型 UI、API 以后端为准已对齐 |
-| 3 · Coding 映射（`3.coding`） | ✅ 完成 | 包/页面映射、横切规约、切片顺序；**不是**可运行代码 |
+| 1 · Requirement（SRS + `1.req`） | ✅ | 门禁通过；Pivot 后见 `entity.md` / `traceability.md` |
+| 2 · Design（`2.design`） | ✅ | 现行 UI 以代码 + 新版 `roadmap/page.md` 为准；`prototype/roadmap.html` 为历史 |
+| 3 · Coding 映射（`3.coding`） | ✅ | `api-contract` 与 Controller 对齐 |
+| **可运行应用** | ✅ **~80% M1** | 见 §4 功能矩阵；§2 为剩余项 |
 
-下一步：在本仓 `jobAssitant/backend` + `jobAssitant/frontend` 按 `3.coding` 与 `2.design`（含 `prototype/`）继续纵向切片。
+**文档阅读建议（不必通读全部 Delta）：**
+
+1. 本文件 Pivot 表 + §4  
+2. [`../3.coding/api-contract.md`](../3.coding/api-contract.md)  
+3. 各域现行 [`../1.req/*/entity.md`](../1.req/roadmap/entity.md)  
+4. 旧 Roadmap 模板 / GRS 用例：**已废止**，仅作历史参考
 
 ---
 
 ## 2. 还有什么没做？
 
-### 2.1 必须做（进入可运行 M1）
+### 2.1 已实现（与代码一致）
 
-- [x] 创建/初始化 **后端工程**（Spring Boot；PostgreSQL / Flyway）
-- [x] 创建/初始化 **前端工程**（Vite + React），UI 对齐 `prototype/`
-- [x] 纵向切片 1：Profile → Home → Jobs/Actions stubs；Roadmap 404
-- [x] Profile 保存驱动 Roadmap 生成 + Home Actions；FreeHire 同步 + Gate/Rank（JobSpy 入口保留，同步以 FreeHire 为主）
-- [ ] JobSpy 子进程实装、Outbox 完整、备份调度、测试底线
-- [ ] 本地联调加深与 CI
-- [ ] 测试底线（见 `3.coding/specification.md`）
+- [x] 后端 Spring Boot + Flyway **V1–V17**
+- [x] 前端 Vite React：**8 页**（Home / Jobs / Sources / Roadmap / LeetCode / Profile / CV / Behavioral）
+- [x] Profile CRUD + field-usage
+- [x] Home BFF + **今日优先三槽**（`today-priority-v1`）
+- [x] Jobs Inbox：Gate / Rank / 状态 / 手动 URL / 去重
+- [x] Jobs Sources：FreeHire + **JobSpy 子进程**、全局 searchTerms、SourceRun 诊断
+- [x] Roadmap：**多夹** Todo / Company / Document（TipTap 自动保存）
+- [x] LeetCode Hot 100 + review + 题面缓存
+- [x] CV 文件管理；Behavioral 本地域
+- [x] 备份：`BackupService` 周日 03:00 + 手动导出/恢复预览
+- [x] 同步：`JobSyncService` 每日 06:00
+- [x] Outbox：`OutboxPublisher` 定时 poll（骨架）
+- [x] **Docker Compose** 一键本地栈
 
-### 2.2 文档层可选补强（不挡开工）
+### 2.2 收尾 / 质量（仍开放）
 
-- [ ] `3.coding/jpa/`、`custom/` 细表映射（规范可选，可边写代码边补）
-- [ ] 人工再抽检一轮 API 与 Controller 一致性（实现中做）
-- [ ] 更新本日志随每次里程碑交付
+- [ ] 单元/集成测试底线（见 `3.coding/specification.md`）
+- [ ] CI 流水线
+- [ ] 乐观锁 `expected*Version` 全面落地（部分域已有）
+- [ ] Outbox 事件消费完整化、删 Roadmap 旧 generate/recompute **死代码**
+- [ ] `package-lock.json` 修复以支持 Docker 内 `npm ci`
+- [ ] SRS 正文 FR 与 Pivot 全面 reconciliation（§0.1 已覆盖决策，正文仍混有历史 FR）
+- [ ] `prototype/roadmap.html` 与现 UI 对齐或标为 ARCHIVED
 
-### 2.3 明确不在当前版本（M1）
+### 2.3 明确不做 / 未接
 
 | 项 | 说明 |
 |---|---|
-| AI 集成 | 默认关闭；M1 不接 provider |
-| CV 完整域 | M2 |
-| Behavioral 完整域 | M3 |
-| Company-forward / referral 链 | 见仓库根 `add.md` §8 |
-| 经验贴 / Reddit 自动抓取 | v1 不做 |
-| 桌面壳 | 可选增强，非 M1 |
+| AI provider 集成 | 默认关闭；Behavioral/CV AI Port → `501` |
+| CV **定向 Review** / 建议决策链 | 文件管理已做；完整 Review 工作流未做 |
+| Roadmap **模板 / 生成 / 重算** | Pivot 废止；后端遗留 API 待清理 |
+| Company-forward / referral | 见 `add.md` |
+| 经验贴 / Reddit 抓取 | v1 不做 |
 | 多租户 / 云 SaaS | 不做 |
 
 ---
 
-## 3. 当前进度总览
+## 3. 进度总览
 
 ```text
-SRS v0.4 ──► 1.req（门禁通过）
-                │
-                ▼
-           2.design（M1 填满）
-           · 前端 5 页 + UI 原型基线
-           · 后端四域 model/crud/api/workflow
-           · FE API 按 BE 对齐（2026-08-09）
-                │
-                ▼
-           3.coding（映射完成）
-           · README / specification / api-contract
-           · server & frontend coding-plan
-                │
-                ▼
-           【下一跳】独立仓生成应用代码  ← 你现在在这里
+SRS v0.4 + Pivot ──► 1.req / 2.design / 3.coding ✅
+                           │
+                           ▼
+              jobAssitant/ 可运行应用 ✅（M1 ~80%）
+                           │
+                           ▼
+              测试 / CI / 文档大扫除 / 死代码清理  ← 当前收尾
 ```
 
 | 日期 | 里程碑 |
 |---|---|
-| 2026-07-29 | Phase 0 数据源：FreeHire + JobSpy；弃用 EURES/独立 ATS |
-| 2026-07-30 | SRS v0.4 / 1.req 门禁；技术栈 ADR；业务规则冻结 |
-| 2026-07-31 | 2.design M1 正文 + PlantUML 可预览；UI 原型验收为基线 |
-| 2026-08-08 | add.md 增补 Company-forward 未来策略 |
-| 2026-08-09 | FE↔BE API 对齐；3.coding 映射写完；**本日志建立** |
+| 2026-07-29 | Phase 0 数据源：FreeHire + JobSpy |
+| 2026-07-30 | SRS v0.4；1.req 门禁 |
+| 2026-07-31 | 2.design M1 + UI 原型基线 |
+| 2026-08-09 | Pivot：Persona / Notion Roadmap / CV·Behavioral 本地域 |
+| 2026-08-25 | Roadmap 多夹 / Document / 今日优先 / LeetCode；Delta 回写 |
+| 2026-09-08 | Docker Compose 合并；**本日志与代码对齐** |
 
 ---
 
-## 4. 当前版本（M1）功能清单
+## 4. 功能矩阵（文档 ↔ 代码）
 
-### 4.1 用户可见
+| 模块 | 文档 | 代码 | 一致 |
+|---|---|---|---|
+| Profile | `api-contract` Profile | `ProfileController` + `ProfilePage` | ✅ |
+| Home / Action | `today-priority-v1` | `HomeController` + `HomeTodayPriorityService` | ✅ |
+| Jobs | job-api | `JobController` + `JobsPage` | ✅ |
+| Sources | job-api sync | `JobSyncService` + `JobsSourcesPage` | ✅ |
+| Roadmap 多夹 | roadmap-api + entity | `RoadmapController` + `RoadmapPage` | ✅ |
+| LeetCode | leetcode-api | `LeetCodeController` + `LeetCodePage` | ✅ |
+| CV 文件 | cv-api | `CvController` + `CvPage` | ✅ |
+| Behavioral | behavioral-api | `BehavioralController` + `BehavioralPage` | ✅ |
+| 备份 / 同步调度 | profile/job workflow | `@Scheduled` in services | ✅ |
+| Docker | 根 README | `docker-compose.yaml` | ✅ |
+| Roadmap 模板生成 | 历史 workflow | `RoadmapService.generate*` 遗留 | ⚠️ 待删 |
+| UI 原型 Roadmap | 时间线 | 左夹右表 | ⚠️ 原型过时 |
 
-| 能力 | 说明 |
+---
+
+## 5. 权威入口速查
+
+| 用途 | 路径 |
 |---|---|
-| Profile | Onboarding + 编辑；教育/工签/目标岗/语言/技能经历；保存影响与重算预览确认 |
-| Home | 今日优先 Action + New Job 条带；为何优先；pin/complete/ignore；导航源对象 |
-| Jobs Inbox | 高密度列表 + 详情；Gate/Rank 证据；状态决定；Gate 覆盖；去重；保存 URL |
-| Jobs Sources | FreeHire / JobSpy 来源；手动同步；SourceRun 诊断 |
-| Roadmap | 多文件夹 TodoList / CompanyTracker / Document（TipTap + 自动保存） |
-| LeetCode | `/leetcode` Hot 100 + review + 题面缓存 |
-| Home | 今日优先三槽 `today-priority-v1`；最多 3 条默认展示 |
-| 备份 | 周日 03:00 自动（保留 4）+ 手动导出 + 恢复预览 |
-| UI | Nav 含 Sources/LeetCode/CV/Behavioral；Profile 头像入口 |
-
-### 4.2 系统能力（非菜单）
-
-| 能力 | 说明 |
-|---|---|
-| 同步 | 每日 06:00；FreeHire 主源 + JobSpy 补充 |
-| Gate | LOCATION / WORK_AUTH / SENIORITY / LANGUAGE；缺入职日 → WORK_AUTH 待确认 |
-| Rank | 五因素投票 → HIGH/MEDIUM/LOW；不自动 Shortlist |
-| Action | 由事件投影；跨域优先级；不拥有 Job 状态 |
-| 乐观锁 | Profile / Job / Action 写带 expected*Version（设计已定，代码待写） |
-| Outbox / 事件 | 域间异步协作骨架 |
-
-### 4.3 技术栈（实现目标）
-
-Java Spring Boot · PostgreSQL · React (Vite) · Python JobSpy · 本地 Web
-
----
-
-## 5. 当前版本「实现内容」指什么？
-
-| 层 | 已有产物 | 未有产物 |
-|---|---|---|
-| 需求 | SRS、1.req UC/流程/实体 | — |
-| 设计 | 2.design 全文、component/api puml、prototype HTML | — |
-| 编码说明 | 3.coding 映射与规约 | — |
-| **可运行应用** | 本仓 `jobAssitant/backend` + `jobAssitant/frontend`（切片 1） | Outbox / Gate-Rank / 同步 / Roadmap 生成 / CI |
-
-因此：**文档 1→2→3 已完成；M1 应用切片 1 已可本地跑通 Profile→Home→Jobs。**
-
----
-
-## 6. 给后续版本的预留（非本版实现）
-
-- Nav / 路由：`/cv`、`/behavioral`「即将推出」
-- Action：`REVIEW_CV_*` / `COMPLETE_BEHAVIORAL_*` 与事件消费规则预留
-- 后端包规划：`(M2) cv` / `(M3) behavioral`
-- SRS：AIConsent / AIInvocation；AI 默认关闭
-- `add.md`：Company-forward strategy
-
----
-
-## 7. 权威入口速查
-
-| 文档 | 路径 |
-|---|---|
-| 需求 | [`SRS.md`](SRS.md) |
+| **进度（本文）** | [`progress-log.md`](progress-log.md) |
+| **API / 行为真相** | [`../3.coding/api-contract.md`](../3.coding/api-contract.md) |
+| 需求索引 | [`../1.req/traceability.md`](../1.req/traceability.md) |
 | 设计总检 | [`../2.design/design-check.md`](../2.design/design-check.md) |
-| API 冻结 | [`../3.coding/api-contract.md`](../3.coding/api-contract.md) |
-| 实现入口 | [`../3.coding/README.md`](../3.coding/README.md) |
-| UI 原型 | [`../2.design/prototype/`](../2.design/prototype/) |
-| 工作空间总览 | [`../README.md`](../README.md) |
+| 怎么跑 | 仓库根 [`README.md`](../../README.md) |
+| UI 基线 | [`../2.design/frontend/ui-baseline.md`](../2.design/frontend/ui-baseline.md) |

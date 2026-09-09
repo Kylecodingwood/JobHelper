@@ -16,11 +16,11 @@
 ## 2. 里程碑
 
 
-| 里程碑 | 范围                     | 主要业务域                      |
-| --- | ---------------------- | -------------------------- |
-| M1  | 个性化准备路线图与职位发现/决策       | Profile、Roadmap、Job、Action |
-| M2  | 通用及按岗位进行 CV Review     | CV、Job、Profile、Action      |
-| M3  | Behavioral Question 准备 | Behavioral、Profile、Action  |
+| 里程碑 | 范围                     | 主要业务域                      | 实现备注（2026-09） |
+| --- | ---------------------- | -------------------------- | --- |
+| M1  | 职位发现/决策 + 准备工具       | Profile、Roadmap、Job、Action、**LeetCode** | 主体已落地 |
+| M1+ | CV **文件** / Behavioral **本地域** | CV、Behavioral | 已提前落地；完整 AI Review 链未接 |
+| M2  | CV 定向 Review / 建议决策（原计划） | CV、Job、Profile、Action | 未做 |
 
 
 ## 3. Module Group
@@ -29,7 +29,8 @@
 | Module Group | 中文职责                       | 详细需求入口                       | 当前状态 |
 | ------------ | -------------------------- | ---------------------------- | ---- |
 | `profile`    | 教育、许可、语言、目标、技能、备份/导出/恢复   | `[profile/](profile/)`       | 已细化  |
-| `roadmap`    | 来源模板、Markdown 导入、任务依赖与相对时间 | `[roadmap/](roadmap/)`       | 已细化  |
+| `roadmap`    | **多文件夹** Todo / CompanyTracker / Document（Pivot；旧模板见 `_archive` 文首废止说明） | `[roadmap/](roadmap/)`       | 已细化 + 已落地  |
+| `leetcode`   | Hot 100 目录 + review + 题面缓存 | `[leetcode/](leetcode/)`     | 已细化 + 已落地  |
 | `job`        | 来源同步、清洗、Gate、Rank、决定与诊断    | `[job/](job/)`               | 已细化  |
 | `cv`         | 文件解析、版本、通用/定向 Review 与建议决策 | `[cv/](cv/)`                 | 已细化  |
 | `behavioral` | 题库、STAR Evidence、答案版本和反馈   | `[behavioral/](behavioral/)` | 已细化  |

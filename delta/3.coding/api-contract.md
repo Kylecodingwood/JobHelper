@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 冻结日 | 2026-08-09；增补 CV / Behavioral；**再增补** Roadmap 多夹（Company/Document）、Home `today-priority-v1`、LeetCode Hot 100 |
+| 冻结日 | 2026-08-09；增补 CV / Behavioral / Roadmap 多夹 / Home `today-priority-v1` / LeetCode；**2026-09-08** 进度见 `SRS/progress-log.md` |
 | 真相源 | 本文件 + 下列 `2.design` api/model |
 | 前版 | 系统模板 / GRS / Profile→Roadmap 重算 / TargetRole→searchTerms **已废止** |
 
@@ -16,7 +16,8 @@
 6. 资源名：`/job-sources`、`/job-source-runs`；Roadmap 单数 `/roadmap`  
 7. **CV**：PDF / DOCX 原样上传；无抽文本产品能力  
 8. **Behavioral**：题库 + Evidence + 本地反馈；AI Port → `AI_NOT_ENABLED`  
-9. **LeetCode**：独立域 `/leetcode`；Hot 100 + review；题面 GraphQL 缓存 
+9. **LeetCode**：独立域 `/leetcode`；Hot 100 + review；题面 GraphQL 缓存  
+10. **Docker**：根目录 `docker compose up --build` → Postgres + backend:8080 + frontend:5173（nginx 反代 `/api`）
 
 ---
 
