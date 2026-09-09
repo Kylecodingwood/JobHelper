@@ -36,7 +36,8 @@ Flyway：`V13`–`V17`。契约：`3.coding/api-contract.md`。
 
 | 项目 | 内容 |
 |---|---|
-| 日志版本 | **2026-09-08** |
+| 日志版本 | **2026-09-09** |
+| Git 作者 | 本仓 `user.email` = GitHub 已验证邮箱（贡献图计数） |
 | 对应需求 | [`SRS.md`](SRS.md) v0.4 + 本日志 Pivot 增补 |
 | 产品阶段 | M1 主功能已可本地日常使用；收尾项见 §2 |
 | **进度真相源** | **本文件 Pivot 表 + [`../3.coding/api-contract.md`](../3.coding/api-contract.md)** |
