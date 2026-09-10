@@ -300,3 +300,101 @@ Company list
 - [Lever Postings API](https://github.com/lever/postings-api)
 - [Reddit API 文档](https://www.reddit.com/dev/api/)（正式接入前核对 ToS 与限流）
 - 示例社区：`r/MovingToIreland`、`r/ireland`、`r/cscareerquestionsEU`
+
+---
+
+## 9. Enterprise 展示面 · 待办（To-Do）
+
+**写入日期：** 2026-09-10  
+**目的：** 对照 enterprise 常见栈，补齐 portfolio / 面试可讲的工程成熟度；与 [`delta/SRS/progress-log.md`](delta/SRS/progress-log.md) §2.2 收尾项、`DEVELOPMENT_PLAN.md` Phase 6 对齐。  
+**GitHub 仓库：** [Kylecodingwood/JobHelper](https://github.com/Kylecodingwood/JobHelper) — 待办落地后在此仓 PR / push；CI 优先用 **GitHub Actions**（与 GitHub 原生集成），Jenkins 可作为 ADR 对比项文档化，不必双轨维护。
+
+### 9.1 现有单元测试（6 个文件）
+
+根目录：`jobAssitant/backend/src/test/java/com/jobhelper/`
+
+| 文件 | 覆盖域 |
+|---|---|
+| `BackendApplicationTests.java` | Spring 上下文加载 smoke test |
+| `action/application/ActionPriorityServiceTest.java` | Home / Action 优先级 |
+| `job/application/GateRankServiceTest.java` | Jobs Gate/Rank |
+| `job/application/GateRankAndAnchorTest.java` | Gate/Rank + Anchor |
+| `job/application/DuplicateUrlNormalizeTest.java` | URL 去重规范化 |
+| `roadmap/domain/GrsAnchorResolverTest.java` | Roadmap GRS anchor（历史域逻辑） |
+
+**缺口：** 无集成测、无前端 E2E；**无 CI 自动跑上述测试**（push 到 GitHub 不会触发 build）。
+
+### 9.2 当前 vs Enterprise（差距摘要）
+
+| 维度 | 现状 | Enterprise 常见 |
+|---|---|---|
+| CI/CD | ❌ 无 `.github/workflows` | GitHub Actions / Jenkins；PR 门禁 |
+| 编排 | ✅ Docker Compose | K8s + Ingress + HPA |
+| 消息 | ⚠️ DB Outbox + 进程内 poll | RabbitMQ / Kafka + 独立 worker |
+| 缓存 | ❌ | Redis（热点读、锁、Session） |
+| 可观测 | 普通 log | Actuator、Prometheus、结构化日志 |
+| 认证 | 单用户本地 | OAuth2 / JWT |
+| 对象存储 | CV 本地 `./data/cv` | S3 / MinIO |
+| API 文档 | 手写 `api-contract.md` | OpenAPI / Swagger |
+| Secrets | compose 明文密码 | `.env` + GitHub Secrets + K8s Secret |
+
+**已有、可演进叙事：** Flyway、Outbox 表、`OutboxPublisher` → 升级到 MQ 是自然路径，不是重写。
+
+### 9.3 待办清单（按优先级）
+
+#### Tier 1 — 必做（面试 ROI 最高）
+
+- [ ] **GitHub Actions CI**：backend `./mvnw test` + package；frontend `npm run lint` + `npm run build`；可选 Docker build 校验
+- [ ] **测试底线**：Profile / Jobs Gate-Rank / Outbox→Action 至少各 1 条集成测；扩展现有 6 个单测覆盖边界
+- [ ] **Spring Actuator**：`/actuator/health`、`/metrics`（Compose 暴露或文档说明）
+- [ ] **架构 README**：Compose 架构图 + ADR（Outbox 为何先进程内、何时上 MQ/K8s）
+- [ ] **package-lock 修复**：Docker 内可 `npm ci`（见 `frontend/Dockerfile` 注释）
+- [ ] **progress-log §2.2 文档项**：SRS 正文 reconciliation；`prototype/roadmap.html` 标 ARCHIVED；删 Roadmap 旧 generate/recompute 死代码
+
+#### Tier 2 — Infra 展示（Redis / MQ / 存储）
+
+- [ ] **Redis**：`docker-compose` 加 `redis`；LeetCode 题面 / Home BFF 短 TTL 缓存（Spring Cache）
+- [ ] **RabbitMQ（或同类）**：Outbox Publisher 改为发 MQ；独立 `worker` 容器消费 → `ActionProjector`
+- [ ] **MinIO**：CV 文件对象存储，替代纯本地 `./data/cv`（Compose profile 可选）
+- [ ] **JobSync 异步化**：FreeHire / JobSpy 长任务进队列，API 立即返回 runId
+
+#### Tier 3 — 部署与「企业感」
+
+- [ ] **K8s manifests / Helm**：backend、frontend、worker、redis、rabbitmq（本地 kind/minikube 演示即可）
+- [ ] **CD**：main 分支 build 镜像 push **GHCR**（`ghcr.io/kylecodingwood/jobhelper-*`）
+- [ ] **OpenAPI**：从 Controller 生成 Swagger UI；与 `api-contract.md` 交叉引用
+- [ ] **多环境配置**：`application-dev.yml` / `prod` + 环境变量；compose override 示例
+
+#### Tier 4 — 可选加深
+
+- [ ] **Jenkinsfile**：与 GHA 平行示例 + ADR「为何生产选 GHA」
+- [ ] **Prometheus + Grafana**：docker compose profile
+- [ ] **简单 JWT 登录**：M2 多用户预留（progress-log 明确 M1 不做 SaaS，但可 ADR 预留）
+- [ ] **Playwright E2E**：Home → Jobs 一条 happy path
+- [ ] **依赖 / 安全扫描**：CI 内 `npm audit`、OWASP dependency-check
+
+### 9.4 GitHub 相关备忘
+
+| 项 | 说明 |
+|---|---|
+| 远程 | `git@github.com:Kylecodingwood/JobHelper.git` |
+| 贡献图 | 本仓 `.git/config` 已设 `user.email = Kylezjyno1@gmail.com`；**仅本仓**生效，其它项目建议 `git config --global user.email` |
+| CI | 待 Tier 1：添加 `.github/workflows/ci.yml` 后，PR 页面会显示 check 状态 |
+| 镜像 / CD | 可选 GHCR + GitHub Actions deploy workflow；Secrets 存于 repo Settings → Secrets |
+| 展示 | README 徽章：`build` / `tests`（CI 就绪后）；链接 live demo（若部署 Railway/Fly.io） |
+
+### 9.5 建议实施顺序
+
+```text
+GitHub Actions + 测试 + Actuator
+        ↓
+Redis 缓存
+        ↓
+Outbox → RabbitMQ + worker 容器
+        ↓
+K8s 编排 + GHCR CD
+        ↓
+OpenAPI / E2E / 可观测（按需）
+```
+
+**原则：** 每项能讲清「M1 为什么需要 / 为什么还没上」；避免空堆 Jenkins/K8s 而无测试与架构说明。
