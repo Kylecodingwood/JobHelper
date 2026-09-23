@@ -53,8 +53,8 @@ public class RoadmapTodoService {
             out.put("companies", List.of());
             out.put("documents", documentService.listByFolder(folderId));
         } else {
-            List<Map<String, Object>> todos = repository
-                    .findByFolderIdOrderByDoneAscSortOrderAscUpdatedAtDesc(folderId).stream()
+            List<Map<String, Object>> todos = RoadmapTodoListOrder
+                    .sorted(repository.findByFolderId(folderId)).stream()
                     .map(this::toDto)
                     .toList();
             out.put("todos", todos);
@@ -166,6 +166,7 @@ public class RoadmapTodoService {
         m.put("comment", t.getComment());
         m.put("done", t.isDone());
         m.put("sortOrder", t.getSortOrder());
+        m.put("createdAt", t.getCreatedAt());
         m.put("updatedAt", t.getUpdatedAt());
         return m;
     }

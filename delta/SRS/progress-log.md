@@ -1,3 +1,11 @@
+## 2026-09-23 · Roadmap Todo 列表排序
+
+| 能力 | 要点 | 关键文档 |
+|---|---|---|
+| Todo 默认排序 | 未完成在上、已完成沉底；有 due 越近越上，无 due 按 `createdAt` 越新越上；无开关 | `1.req/roadmap/entity.md`；`3.coding/api-contract.md` |
+
+---
+
 ## Pivot 2026-09-08 · Docker Compose
 
 | 能力 | 要点 | 关键文档 |
@@ -36,7 +44,7 @@ Flyway：`V13`–`V17`。契约：`3.coding/api-contract.md`。
 
 | 项目 | 内容 |
 |---|---|
-| 日志版本 | **2026-09-09** |
+| 日志版本 | **2026-09-23** |
 | Git 作者 | 本仓 `user.email` = GitHub 已验证邮箱（贡献图计数） |
 | 对应需求 | [`SRS.md`](SRS.md) v0.4 + 本日志 Pivot 增补 |
 | 产品阶段 | M1 主功能已可本地日常使用；收尾项见 §2 |
@@ -126,6 +134,7 @@ SRS v0.4 + Pivot ──► 1.req / 2.design / 3.coding ✅
 | 2026-08-09 | Pivot：Persona / Notion Roadmap / CV·Behavioral 本地域 |
 | 2026-08-25 | Roadmap 多夹 / Document / 今日优先 / LeetCode；Delta 回写 |
 | 2026-09-08 | Docker Compose 合并；**本日志与代码对齐** |
+| 2026-09-23 | Roadmap Todo 默认按 due / createdAt 排序 |
 
 ---
 
@@ -138,6 +147,7 @@ SRS v0.4 + Pivot ──► 1.req / 2.design / 3.coding ✅
 | Jobs | job-api | `JobController` + `JobsPage` | ✅ |
 | Sources | job-api sync | `JobSyncService` + `JobsSourcesPage` | ✅ |
 | Roadmap 多夹 | roadmap-api + entity | `RoadmapController` + `RoadmapPage` | ✅ |
+| Roadmap Todo 排序 | entity / api-contract | `RoadmapTodoListOrder` + `RoadmapPage.sortTodos` | ✅ |
 | LeetCode | leetcode-api | `LeetCodeController` + `LeetCodePage` | ✅ |
 | CV 文件 | cv-api | `CvController` + `CvPage` | ✅ |
 | Behavioral | behavioral-api | `BehavioralController` + `BehavioralPage` | ✅ |

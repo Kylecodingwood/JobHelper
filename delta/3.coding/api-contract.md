@@ -25,7 +25,7 @@
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[], documents[] }` |
+| GET | `/api/v1/roadmap` | `?folderId=` → `{ folderId, kind, folders[], todos[], companies[], documents[] }`；`todos[]` 已按下列默认顺序排好 |
 | GET | `/api/v1/roadmap/folders` | `{ folders[] }` |
 | POST | `/api/v1/roadmap/folders` | `{ name, kind? }` → 201；`kind`: `todolist`（默认）\|`companytracker`\|`document` |
 | PATCH | `/api/v1/roadmap/folders/{folderId}` | `{ name }` 重命名（不可改 kind） |
@@ -43,7 +43,9 @@
 
 **FolderDto**：`folderId`, `name`, `kind`, `itemCount`, `sortOrder`, `updatedAt`
 
-**TodoDto**：`todoId`, `folderId`, `name`, `dueAt`, `comment`, `done`, `sortOrder`, `updatedAt`
+**TodoDto**：`todoId`, `folderId`, `name`, `dueAt`, `comment`, `done`, `sortOrder`, `createdAt`, `updatedAt`
+
+**Todo 列表顺序**（默认，无开关）：未完成在上、已完成沉底；组内有 due 的越近越上，无 due 的按 `createdAt` 越新越上；同一 due 时越新越上。
 
 **CompanyDto**：`companyId`, `folderId`, `companyName`, `status`, `contact`, `note`, `sortOrder`, `updatedAt`
 

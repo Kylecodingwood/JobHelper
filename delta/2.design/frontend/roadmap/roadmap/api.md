@@ -5,9 +5,9 @@
 
 | 场景 | 调用 |
 |---|---|
-| 打开 / 切换夹 | `GET /roadmap?folderId=` |
+| 打开 / 切换夹 | `GET /roadmap?folderId=`（`todos[]` 已按默认顺序） |
 | 文件夹 CRUD | `POST/PATCH/DELETE /roadmap/folders…` |
-| Todo | `POST/PATCH/DELETE` + `toggle` |
+| Todo | `POST/PATCH/DELETE` + `toggle`；改 `dueAt` / `done` 后前端按同一规则立刻重排 |
 | Company | `POST/PATCH/DELETE /roadmap/companies…` |
 | Document | `POST/PATCH/DELETE /roadmap/documents…` |
 

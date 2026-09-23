@@ -18,7 +18,7 @@
 | 域 | 边界 |
 |---|---|
 | Profile | 画像 CRUD + backup；**不**驱动 Roadmap；**不**派生 Source 搜索词 |
-| Roadmap | 独立 todos；无模板/依赖/GRS/重算 |
+| Roadmap | 独立 todos；列表默认按 due / createdAt 排序；无模板/依赖/GRS/重算 |
 | Job | Source 自管 `searchTerms`；Gate 可读 Profile 身份/语言 |
 | Action/Home | 事件投影；Home 默认 3 条 |
 

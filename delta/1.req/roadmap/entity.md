@@ -26,9 +26,16 @@
 |---|---|
 | `todoId`, `folderId` | |
 | `name` | 必填 |
-| `dueAt?`, `comment?` | |
+| `dueAt?`, `comment?` | `dueAt` 可空 |
 | `done` | checkbox |
-| `sortOrder` | |
+| `createdAt` | 必填；创建时写入，列表无 due 时用此排序 |
+| `sortOrder` | 创建时序号；**列表展示不再按它排** |
+
+**Todo 列表顺序**（默认，无开关；未完成组与已完成组各自套用）：
+
+1. 未完成在上，已完成沉底。
+2. 组内有 `dueAt` 的全部在前，越近越上；无 `dueAt` 的全部在后，按 `createdAt` 越新越上。
+3. 同一 `dueAt` 时按 `createdAt` 越新越上。
 
 ## 4. RoadmapCompany（`kind=companytracker`）
 

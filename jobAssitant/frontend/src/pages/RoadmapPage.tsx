@@ -22,6 +22,7 @@ type Todo = {
   comment?: string | null
   done: boolean
   sortOrder: number
+  createdAt?: string | null
 }
 
 type Company = {
@@ -98,7 +99,7 @@ export function RoadmapPage() {
       setFolders(data.folders || [])
       setSelectedFolderId(data.folderId)
       setKind(data.kind || 'todolist')
-      setTodos(data.todos || [])
+      setTodos(sortTodos(data.todos || []))
       setCompanies(data.companies || [])
       const docs = data.documents || []
       setDocuments(docs)
@@ -184,7 +185,7 @@ export function RoadmapPage() {
       } else {
         await api.patch(`/roadmap/todos/${todoId}`, body)
       }
-      setTodos((prev) => prev.map((t) => (t.todoId === todoId ? { ...t, ...body } : t)))
+      setTodos((prev) => sortTodos(prev.map((t) => (t.todoId === todoId ? { ...t, ...body } : t))))
       setSaveHint('Saved')
       window.setTimeout(() => setSaveHint(null), 1200)
     } catch (err) {
@@ -305,7 +306,7 @@ export function RoadmapPage() {
   async function patchTodo(todo: Todo, body: Partial<Todo>) {
     try {
       await api.patch(`/roadmap/todos/${todo.todoId}`, body)
-      setTodos((prev) => prev.map((t) => (t.todoId === todo.todoId ? { ...t, ...body } : t)))
+      setTodos((prev) => sortTodos(prev.map((t) => (t.todoId === todo.todoId ? { ...t, ...body } : t))))
     } catch (err) {
       setMsg(err instanceof ApiError ? `${err.code}: ${err.message}` : 'Update failed')
     }
@@ -314,7 +315,7 @@ export function RoadmapPage() {
   async function toggle(todo: Todo) {
     try {
       await api.post(`/roadmap/todos/${todo.todoId}/toggle`)
-      setTodos((prev) => prev.map((t) => (t.todoId === todo.todoId ? { ...t, done: !t.done } : t)))
+      setTodos((prev) => sortTodos(prev.map((t) => (t.todoId === todo.todoId ? { ...t, done: !t.done } : t))))
     } catch (err) {
       setMsg(err instanceof ApiError ? `${err.code}: ${err.message}` : 'Toggle failed')
     }
@@ -792,6 +793,24 @@ export function RoadmapPage() {
       </div>
     </div>
   )
+}
+
+function sortTodos(todos: Todo[]): Todo[] {
+  return [...todos].sort(compareTodos)
+}
+
+function compareTodos(a: Todo, b: Todo): number {
+  if (a.done !== b.done) return a.done ? 1 : -1
+  const aHasDue = Boolean(a.dueAt)
+  const bHasDue = Boolean(b.dueAt)
+  if (aHasDue !== bHasDue) return aHasDue ? -1 : 1
+  if (aHasDue && bHasDue && a.dueAt !== b.dueAt) {
+    return a.dueAt! < b.dueAt! ? -1 : 1
+  }
+  const aCreated = a.createdAt || ''
+  const bCreated = b.createdAt || ''
+  if (aCreated !== bCreated) return aCreated > bCreated ? -1 : 1
+  return 0
 }
 
 async function patchKeepalive(path: string, body: unknown) {

@@ -7,7 +7,7 @@
 | 编号 | 名称 | 说明 |
 |---|---|---|
 | UC-RDM-F01 | 管理文件夹 | 创建（选 kind）/ 重命名 / 删除（不可删最后一个；级联内容） |
-| UC-RDM-F02 | TodoList | 勾选、改 name/due/comment；防抖+失焦自动保存 |
+| UC-RDM-F02 | TodoList | 勾选、改 name/due/comment；防抖+失焦自动保存；列表默认按 due / 新建时间排序（见 entity.md） |
 | UC-RDM-F03 | CompanyTracker | 公司行 + status 枚举 + contact/note |
 | UC-RDM-F04 | Document | 文档列表 + 标题 + TipTap HTML 正文；自动保存；切换文档才重置编辑器 |
 

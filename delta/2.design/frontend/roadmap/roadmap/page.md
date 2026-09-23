@@ -15,7 +15,7 @@
 
 1. `GET /roadmap?folderId=` 加载 folders + 当前夹内容。  
 2. 创建文件夹：名称 + kind（`todolist` / `companytracker` / `document`）；入口在文件夹列表底部。  
-3. **TodoList**：Notion 式表；comment/name **防抖 ~700ms** + blur flush；切页 `keepalive` 冲刷。  
+3. **TodoList**：Notion 式表；comment/name **防抖 ~700ms** + blur flush；切页 `keepalive` 冲刷。列表默认排序（无开关）：未完成在上、已完成沉底；组内有 due 的越近越上，无 due 的按 `createdAt` 越新越上；改 due / 勾选后立刻重排。  
 4. **CompanyTracker**：company / status / contact / note；同样自动保存。  
 5. **Document**：文档列表 → 选中后编辑 title + TipTap `bodyHtml`；自动保存；**仅 `documentId` 变化时 `setContent`**，避免 HTML 规范化回灌白屏。  
 6. 顶栏可显示 `Saving…` / `Saved`。  

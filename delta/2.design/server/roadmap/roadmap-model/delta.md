@@ -22,8 +22,10 @@
 | due_at | TIMESTAMPTZ | 可空 |
 | comment | TEXT | 可空 |
 | done | BOOLEAN NOT NULL DEFAULT FALSE | |
-| sort_order | INT | |
-| created_at / updated_at | TIMESTAMPTZ | |
+| sort_order | INT | 创建时序号；列表展示不按此列 |
+| created_at / updated_at | TIMESTAMPTZ | 无 due 时按 `created_at` 降序 |
+
+列表顺序见 [`../roadmap-api/delta.md`](../roadmap-api/delta.md) 与 [`../../../../3.coding/api-contract.md`](../../../../3.coding/api-contract.md)。
 
 ## `roadmap_company`
 
