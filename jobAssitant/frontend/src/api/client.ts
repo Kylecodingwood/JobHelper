@@ -1,4 +1,8 @@
-const BASE = '/api/v1'
+const API_ORIGIN = import.meta.env.VITE_API_BASE_URL ?? ''
+const BASE = `${API_ORIGIN}/api/v1`
+const _u = import.meta.env.VITE_API_USERNAME ?? ''
+const _p = import.meta.env.VITE_API_PASSWORD ?? ''
+const AUTH_HEADER = _u ? `Basic ${btoa(`${_u}:${_p}`)}` : undefined
 
 export class ApiError extends Error {
   code: string
@@ -14,7 +18,7 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(init?.headers || {}) },
+    headers: { 'Content-Type': 'application/json', ...(AUTH_HEADER ? { Authorization: AUTH_HEADER } : {}), ...(init?.headers || {}) },
     ...init,
   })
   if (!res.ok) {
@@ -31,7 +35,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 async function uploadFormData<T>(path: string, form: FormData): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { method: 'POST', body: form })
+  const res = await fetch(`${BASE}${path}`, { method: 'POST', body: form, headers: AUTH_HEADER ? { Authorization: AUTH_HEADER } : undefined })
   if (!res.ok) {
     let body: { code?: string; message?: string; details?: unknown } = {}
     try {
