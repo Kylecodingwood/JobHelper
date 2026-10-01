@@ -30,6 +30,9 @@ logging:
     com.jobhelper: INFO
 
 jobhelper:
+  auth:
+    username: ${APP_USERNAME:admin}
+    password: ${APP_PASSWORD:changeme}
   outbox:
     poll-ms: 5000
   backup:
