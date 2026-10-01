@@ -1,6 +1,8 @@
 spring:
   application:
     name: job-helper-backend
+  main:
+    lazy-initialization: true
   datasource:
     url: jdbc:postgresql://localhost:5432/jobhelper
     username: jobhelper
