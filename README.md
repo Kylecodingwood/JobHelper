@@ -1,40 +1,71 @@
 # Job Helper
 
-Local-first Ireland job-prep app (M1). Specs live under `delta/`; runnable code under `jobAssitant/`.
+A personal job-search management app built for the Irish graduate market. Tracks jobs, manages application roadmaps, practises behavioural interview questions, and keeps LeetCode progress — all in one place.
+
+**Tech stack:** Java 21 · Spring Boot · PostgreSQL · Flyway · React · TypeScript · Vite · Docker
+
+---
+
+## Screenshots
+
+| | |
+|---|---|
+| **Today's priorities** — smart action feed ranked by urgency | **Job board** — scraped listings filtered and ranked by fit |
+| ![Home](docs/images/home.png) | ![Jobs](docs/images/jobs.png) |
+| **Application roadmap** — per-company todo lists with due dates | **LeetCode tracker** — Hot 100 progress with spaced review |
+| ![Roadmap](docs/images/roadmap.png) | ![LeetCode](docs/images/leetcode.png) |
+| **Behavioural prep** — STAR answer bank with local feedback | **CV library** — version-controlled CV file storage |
+| ![Behavioral](docs/images/behavioral.png) | ![CV](docs/images/cv.png) |
+
+---
+
+## Features
+
+- **Home feed** — daily priority list combining job actions, roadmap todos, and LeetCode reminders, ranked by urgency band
+- **Job discovery** — integrates with FreeHire and JobSpy to scrape Ireland listings; deduplication and gate/rank scoring built in
+- **Application roadmap** — per-company task lists with folder organisation, dependency tracking, and due-date ordering
+- **LeetCode Hot 100** — fetches problem content, tracks solve status, surfaces problems due for review
+- **Behavioural question bank** — curated questions with STAR evidence tagging and local rule-based feedback
+- **CV management** — upload and store multiple CV versions (PDF/DOCX)
+- **Scheduled sync** — automatic job scraping via cron, weekly backup to zip
+
+---
 
 ## Quick start
 
-```bash
-# API (PostgreSQL localhost:5432/jobhelper)
-cd jobAssitant/backend && ./mvnw spring-boot:run
-
-# UI (proxies /api → :8080)
-cd jobAssitant/frontend && npm install && npm run dev
-```
-
-Or run the whole stack with Docker:
+Requires Docker (no local Java or Node needed).
 
 ```bash
 docker compose up --build
 ```
 
-- Frontend: http://localhost:5173  
-- API: http://localhost:8080/api/v1  
-- Specs: [`delta/README.md`](delta/README.md) · Progress: [`delta/SRS/progress-log.md`](delta/SRS/progress-log.md)
+- Frontend: http://localhost:5173
+- API: http://localhost:8080/api/v1
 
-## Layout
+To stop and remove all data:
 
-| Path | Role |
-|---|---|
-| `delta/` | SRS → 1.req → 2.design → 3.coding |
-| `jobAssitant/backend/` | Spring Boot API (M1 slice) |
-| `jobAssitant/frontend/` | Vite React UI (prototype-aligned) |
-| `add.md` | Forward-looking notes (e.g. Company-forward) |
+```bash
+docker compose down -v
+```
 
-## M1 status (2026-09-08)
+---
 
-**Implemented:** Profile · Home (today-priority-v1) · Jobs (Gate/Rank/status) · Sources (FreeHire + JobSpy) · Roadmap (multi-folder Todo/Company/Document) · LeetCode · CV files · Behavioral local domain · scheduled sync/backup · Docker Compose.
+## Project layout
 
-**Remaining:** tests/CI · full optimistic locking · Outbox hardening · remove legacy Roadmap generate code.
+```
+jobAssitant/
+  backend/    Spring Boot API — Jobs, Roadmap, LeetCode, Behavioral, CV, Profile
+  frontend/   React SPA — Vite + TypeScript
+delta/        Specs: requirements → design → coding plan
+docs/         Architecture notes and screenshots
+docker-compose.yaml
+```
 
-Details: [`delta/SRS/progress-log.md`](delta/SRS/progress-log.md) · API: [`delta/3.coding/api-contract.md`](delta/3.coding/api-contract.md)
+---
+
+## Architecture notes
+
+- **Outbox pattern** for reliable event publishing between modules
+- **Flyway** database migrations (17 versions)
+- **Domain / application / infrastructure layering** per module
+- **Gate + Rank scoring** for job fit evaluation with duplicate URL normalisation
