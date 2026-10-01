@@ -6,7 +6,14 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+
+ARG VITE_API_BASE_URL
+ARG VITE_API_USERNAME
+ARG VITE_API_PASSWORD
+RUN VITE_API_BASE_URL=$VITE_API_BASE_URL \
+    VITE_API_USERNAME=$VITE_API_USERNAME \
+    VITE_API_PASSWORD=$VITE_API_PASSWORD \
+    npm run build
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
