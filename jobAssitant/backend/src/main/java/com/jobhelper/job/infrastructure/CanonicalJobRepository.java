@@ -19,4 +19,8 @@ public interface CanonicalJobRepository
     List<CanonicalJobEntity> findByCompanyIgnoreCase(String company);
 
     long countByJobStatusAndHiddenByDefaultFalse(String jobStatus);
+
+    long countByJobStatus(String jobStatus);
+    long countByGateStatus(String gateStatus);
+    long countByRankTier(String rankTier);
 }

@@ -6,13 +6,26 @@ import { HomePage } from './pages/HomePage'
 import { JobsPage } from './pages/JobsPage'
 import { JobsSourcesPage } from './pages/JobsSourcesPage'
 import { LeetCodePage } from './pages/LeetCodePage'
+import { LoginPage } from './pages/LoginPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RoadmapPage } from './pages/RoadmapPage'
+import { getToken } from './api/client'
+
+function PrivateRoute({ children }: { children: React.ReactNode }) {
+  return getToken() ? <>{children}</> : <Navigate to="/login" replace />
+}
 
 export default function App() {
   return (
     <Routes>
-      <Route element={<Layout />}>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        element={
+          <PrivateRoute>
+            <Layout />
+          </PrivateRoute>
+        }
+      >
         <Route index element={<HomePage />} />
         <Route path="jobs" element={<JobsPage />} />
         <Route path="jobs/sources" element={<JobsSourcesPage />} />

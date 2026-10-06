@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.RestController;
 
 import tools.jackson.databind.JsonNode;
@@ -98,12 +101,18 @@ public class JobController {
                 "totalElements", result.getTotalElements());
     }
 
+    private static final java.util.Set<String> ALLOWED_SORT_FIELDS = java.util.Set.of(
+            "lastSeenAt", "firstSeenAt", "title", "company", "jobStatus", "rankTier", "gateStatus", "updatedAt");
+
     private Sort parseSort(String sort) {
         if (sort == null || sort.isBlank()) {
             return Sort.by(Sort.Direction.DESC, "lastSeenAt");
         }
         String[] parts = sort.split(",");
         String field = parts[0].trim();
+        if (!ALLOWED_SORT_FIELDS.contains(field)) {
+            field = "lastSeenAt";
+        }
         Sort.Direction direction = parts.length > 1 && "desc".equalsIgnoreCase(parts[1].trim())
                 ? Sort.Direction.DESC
                 : Sort.Direction.ASC;
@@ -133,10 +142,10 @@ public class JobController {
         return detail;
     }
 
-    public record StatusChangeRequest(String toStatus, Integer expectedVersion) {}
+    public record StatusChangeRequest(@NotBlank @Size(max = 50) String toStatus, Integer expectedVersion) {}
 
     @PatchMapping("/jobs/{jobId}/status")
-    public Map<String, Object> changeStatus(@PathVariable UUID jobId, @RequestBody StatusChangeRequest request) {
+    public Map<String, Object> changeStatus(@PathVariable UUID jobId, @Valid @RequestBody StatusChangeRequest request) {
         CanonicalJobEntity job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "JOB_NOT_FOUND", "Job not found"));
         if (request.expectedVersion() == null || !request.expectedVersion().equals(job.getVersion())) {
@@ -151,7 +160,7 @@ public class JobController {
         return detail(jobId);
     }
 
-    public record GateOverrideRequest(String reason, Integer expectedVersion) {}
+    public record GateOverrideRequest(@NotBlank @Size(max = 500) String reason, Integer expectedVersion) {}
 
     @PostMapping("/jobs/{jobId}/gate-override")
     public Map<String, Object> gateOverride(@PathVariable UUID jobId, @RequestBody GateOverrideRequest request) {
@@ -231,10 +240,12 @@ public class JobController {
                 "checkedAt", Instant.now().toString());
     }
 
-    public record ManualUrlRequest(String url, String userProvidedJd, String note) {}
+    public record ManualUrlRequest(@NotBlank @Size(max = 2000) String url,
+                                   @Size(max = 50000) String userProvidedJd,
+                                   @Size(max = 2000) String note) {}
 
     @PostMapping("/jobs/manual-url")
-    public ResponseEntity<Map<String, Object>> manualUrl(@RequestBody ManualUrlRequest request) {
+    public ResponseEntity<Map<String, Object>> manualUrl(@Valid @RequestBody ManualUrlRequest request) {
         if (request.url() == null || request.url().isBlank()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "url required");
         }
