@@ -32,6 +32,9 @@ type Company = {
   status: string
   contact?: string | null
   note?: string | null
+  position?: string | null
+  reason?: string | null
+  interviewAt?: string | null
   sortOrder: number
 }
 
@@ -78,6 +81,9 @@ export function RoadmapPage() {
   const [saveHint, setSaveHint] = useState<string | null>(null)
 
   const pendingRef = useRef(new Map<string, PendingSave>())
+  const dragFolderIdRef = useRef<string | null>(null)
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null)
+  const [showOldTodoFolders, setShowOldTodoFolders] = useState(false)
 
   const selected = folders.find((f) => f.folderId === selectedFolderId) || null
   const isCompany = kind === 'companytracker'
@@ -115,7 +121,19 @@ export function RoadmapPage() {
   }
 
   useEffect(() => {
-    void load()
+    void (async () => {
+      try {
+        const result = await api.post<{ moved: number; targetFolderName: string | null }>('/roadmap/rollover', {})
+        if (result.moved > 0) {
+          await load()
+          setMsg(`已将 ${result.moved} 个未完成任务迁移到「${result.targetFolderName}」`)
+        } else {
+          await load()
+        }
+      } catch {
+        await load()
+      }
+    })()
   }, [])
 
   useEffect(() => {
@@ -441,10 +459,35 @@ export function RoadmapPage() {
     }
   }
 
-  function kindLabel(k: FolderKind) {
-    if (k === 'companytracker') return '公司'
-    if (k === 'document') return '文档'
-    return 'Todo'
+  const KIND_ORDER: FolderKind[] = ['todolist', 'companytracker', 'document']
+  const KIND_LABEL: Record<FolderKind, string> = { todolist: '', companytracker: '公司', document: '文档' }
+  const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000
+
+  async function onFolderDrop(targetFolderId: string) {
+    const srcId = dragFolderIdRef.current
+    setDragOverFolderId(null)
+    dragFolderIdRef.current = null
+    if (!srcId || srcId === targetFolderId) return
+    const src = folders.find((f) => f.folderId === srcId)
+    const tgt = folders.find((f) => f.folderId === targetFolderId)
+    if (!src || !tgt || src.kind !== tgt.kind) return
+    const group = folders.filter((f) => f.kind === src.kind)
+    const srcIdx = group.findIndex((f) => f.folderId === srcId)
+    const tgtIdx = group.findIndex((f) => f.folderId === targetFolderId)
+    const reordered = [...group]
+    reordered.splice(srcIdx, 1)
+    reordered.splice(tgtIdx, 0, src)
+    const updated = reordered.map((f, i) => ({ ...f, sortOrder: i }))
+    setFolders((prev) => {
+      const others = prev.filter((f) => f.kind !== src.kind)
+      const kindOrder: Record<FolderKind, number> = { todolist: 0, companytracker: 1, document: 2 }
+      return [...others, ...updated].sort((a, b) => {
+        const kd = (kindOrder[a.kind] ?? 0) - (kindOrder[b.kind] ?? 0)
+        if (kd !== 0) return kd
+        return (a.sortOrder ?? 0) - (b.sortOrder ?? 0)
+      })
+    })
+    await Promise.all(updated.map((f) => api.patch(`/roadmap/folders/${f.folderId}`, { sortOrder: f.sortOrder })))
   }
 
   function queueTodoField(todo: Todo, field: 'comment' | 'name', value: string, immediate = false) {
@@ -465,24 +508,15 @@ export function RoadmapPage() {
 
   function queueCompanyField(
     company: Company,
-    field: 'note' | 'contact' | 'companyName',
+    field: 'note' | 'contact' | 'companyName' | 'position' | 'reason' | 'interviewAt',
     value: string,
     immediate = false,
   ) {
     if (field === 'companyName' && !value.trim()) return
-    const key = `company:${company.companyId}:${field === 'companyName' ? 'name' : field}`
-    const baseline =
-      field === 'note'
-        ? { note: company.note }
-        : field === 'contact'
-          ? { contact: company.contact }
-          : { companyName: company.companyName }
-    const body =
-      field === 'note'
-        ? { note: value }
-        : field === 'contact'
-          ? { contact: value }
-          : { companyName: value.trim() }
+    const keyMap: Record<string, string> = { companyName: 'name', note: 'note', contact: 'contact', position: 'position', reason: 'reason', interviewAt: 'interviewAt' }
+    const key = `company:${company.companyId}:${keyMap[field]}`
+    const baseline: Partial<Company> = { [field]: company[field as keyof Company] as string }
+    const body: Partial<Company> = { [field]: field === 'companyName' ? value.trim() : value }
     const run = (opts?: { keepalive?: boolean }) => patchCompanySilent(company.companyId, body, baseline, opts)
     if (immediate) {
       const existing = pendingRef.current.get(key)
@@ -514,7 +548,6 @@ export function RoadmapPage() {
     <div className="page roadmap-folders-page">
       <div className="topbar">
         <h1>Roadmap</h1>
-        <span style={{ fontSize: 12, color: 'var(--ink-muted)' }}>TodoList / Company / Document</span>
         {saveHint && (
           <span style={{ fontSize: 12, color: 'var(--ink-muted)', marginLeft: 8 }}>{saveHint}</span>
         )}
@@ -527,72 +560,108 @@ export function RoadmapPage() {
 
       <div className="roadmap-split">
         <aside className="roadmap-folder-pane">
-          <div className="roadmap-folder-head">文件夹</div>
+          <div className="roadmap-folder-head">Todo</div>
           <ul className="roadmap-folder-list">
-            {folders.map((f) => (
-              <li key={f.folderId} className={f.folderId === selectedFolderId ? 'active' : undefined}>
-                {renamingId === f.folderId ? (
-                  <input
-                    className="roadmap-folder-rename"
-                    value={renameValue}
-                    autoFocus
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    onBlur={() => void saveRename(f)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        void saveRename(f)
-                      }
-                      if (e.key === 'Escape') setRenamingId(null)
-                    }}
-                  />
-                ) : (
-                  <button type="button" className="roadmap-folder-btn" onClick={() => void selectFolder(f.folderId)}>
-                    <span className="roadmap-folder-name">
-                      <span className="roadmap-folder-kind">{kindLabel(f.kind || 'todolist')}</span>
-                      {f.name}
-                    </span>
-                    <span className="count">{f.itemCount ?? f.todoCount ?? 0}</span>
-                  </button>
-                )}
-                <div className="roadmap-folder-actions">
-                  <button
-                    type="button"
-                    className="btn btn-sm link"
-                    title="重命名"
-                    onClick={() => {
-                      setRenamingId(f.folderId)
-                      setRenameValue(f.name)
-                    }}
-                  >
-                    改名
-                  </button>
-                  <button type="button" className="btn btn-sm link" onClick={() => void removeFolder(f)}>
-                    删
-                  </button>
-                </div>
-              </li>
-            ))}
+            {KIND_ORDER.flatMap((kind) => {
+              let group = folders.filter((f) => (f.kind || 'todolist') === kind)
+              if (!group.length) return []
+
+              let oldFolders: Folder[] = []
+              if (kind === 'todolist') {
+                const dateFolders = group
+                  .filter((f) => parseFolderDate(f.name) !== null)
+                  .sort((a, b) => parseFolderDate(b.name)!.getTime() - parseFolderDate(a.name)!.getTime())
+                const nonDateFolders = group.filter((f) => parseFolderDate(f.name) === null)
+                const recent = dateFolders.slice(0, 3)
+                oldFolders = dateFolders.slice(3)
+                group = [...nonDateFolders, ...recent]
+              }
+
+              const renderItem = (f: Folder) => (
+                <li
+                  key={f.folderId}
+                  className={[
+                    f.folderId === selectedFolderId ? 'active' : '',
+                    dragOverFolderId === f.folderId ? 'drag-over' : '',
+                  ].filter(Boolean).join(' ') || undefined}
+                  draggable
+                  onDragStart={() => { dragFolderIdRef.current = f.folderId }}
+                  onDragOver={(e) => { e.preventDefault(); setDragOverFolderId(f.folderId) }}
+                  onDragLeave={() => setDragOverFolderId(null)}
+                  onDrop={() => void onFolderDrop(f.folderId)}
+                >
+                  {renamingId === f.folderId ? (
+                    <input
+                      className="roadmap-folder-rename"
+                      value={renameValue}
+                      autoFocus
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onBlur={() => void saveRename(f)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          void saveRename(f)
+                        }
+                        if (e.key === 'Escape') setRenamingId(null)
+                      }}
+                    />
+                  ) : (
+                    <button type="button" className="roadmap-folder-btn" onClick={() => void selectFolder(f.folderId)}>
+                      <span className="roadmap-folder-name">{f.name}</span>
+                      <span className="count">{f.itemCount ?? f.todoCount ?? 0}</span>
+                    </button>
+                  )}
+                  <div className="roadmap-folder-actions">
+                    <button
+                      type="button"
+                      className="folder-icon-btn"
+                      title="重命名"
+                      onClick={() => {
+                        setRenamingId(f.folderId)
+                        setRenameValue(f.name)
+                      }}
+                    >
+                      ✎
+                    </button>
+                    <button type="button" className="folder-icon-btn del" onClick={() => void removeFolder(f)}>
+                      ✕
+                    </button>
+                  </div>
+                </li>
+              )
+
+              return [
+                ...(KIND_LABEL[kind] ? [<li key={`grp-${kind}`} className="roadmap-folder-group-label">{KIND_LABEL[kind]}</li>] : []),
+                ...group.map(renderItem),
+                ...(oldFolders.length > 0 ? [
+                  <li key="old-toggle" className="roadmap-folder-old-toggle">
+                    <button type="button" onClick={() => setShowOldTodoFolders((v) => !v)}>
+                      {showOldTodoFolders ? '▲' : '▼'} 更早 ({oldFolders.length})
+                    </button>
+                  </li>,
+                  ...(showOldTodoFolders ? oldFolders.map(renderItem) : []),
+                ] : []),
+              ]
+            })}
             <li className="roadmap-folder-add-item">
               <form className="roadmap-folder-add" onSubmit={(e) => void addFolder(e)}>
+                <input
+                  value={draftFolderName}
+                  onChange={(e) => setDraftFolderName(e.target.value)}
+                  placeholder="自定义"
+                  required
+                />
                 <select
                   value={draftFolderKind}
                   onChange={(e) => setDraftFolderKind(e.target.value as FolderKind)}
                   aria-label="文件夹类型"
+                  title="类型"
                 >
-                  <option value="todolist">TodoList</option>
-                  <option value="companytracker">CompanyTracker</option>
-                  <option value="document">Document</option>
+                  <option value="todolist">Todo</option>
+                  <option value="companytracker">公司</option>
+                  <option value="document">文档</option>
                 </select>
-                <input
-                  value={draftFolderName}
-                  onChange={(e) => setDraftFolderName(e.target.value)}
-                  placeholder="新建文件夹…"
-                  required
-                />
-                <button className="btn btn-sm btn-primary" type="submit">
-                  +
-                </button>
+                <button className="btn btn-sm btn-primary" type="submit">+</button>
               </form>
             </li>
           </ul>
@@ -681,8 +750,11 @@ export function RoadmapPage() {
               <div className="notion-table company-table">
                 <div className="notion-head company-head">
                   <span>Company</span>
+                  <span>岗位</span>
                   <span>Status</span>
                   <span>Contact</span>
+                  <span>面试时间</span>
+                  <span>Reason</span>
                   <span>Note</span>
                   <span />
                 </div>
@@ -694,6 +766,13 @@ export function RoadmapPage() {
                       key={`${c.companyId}-name`}
                       onChange={(e) => queueCompanyField(c, 'companyName', e.target.value)}
                       onBlur={(e) => queueCompanyField(c, 'companyName', e.target.value, true)}
+                    />
+                    <input
+                      defaultValue={c.position || ''}
+                      key={`${c.companyId}-position`}
+                      placeholder="岗位…"
+                      onChange={(e) => queueCompanyField(c, 'position', e.target.value)}
+                      onBlur={(e) => queueCompanyField(c, 'position', e.target.value, true)}
                     />
                     <select
                       value={c.status}
@@ -711,6 +790,20 @@ export function RoadmapPage() {
                       placeholder="联系人…"
                       onChange={(e) => queueCompanyField(c, 'contact', e.target.value)}
                       onBlur={(e) => queueCompanyField(c, 'contact', e.target.value, true)}
+                    />
+                    <input
+                      defaultValue={c.interviewAt || ''}
+                      key={`${c.companyId}-interview`}
+                      placeholder="面试时间…"
+                      onChange={(e) => queueCompanyField(c, 'interviewAt', e.target.value)}
+                      onBlur={(e) => queueCompanyField(c, 'interviewAt', e.target.value, true)}
+                    />
+                    <input
+                      defaultValue={c.reason || ''}
+                      key={`${c.companyId}-reason`}
+                      placeholder="原因…"
+                      onChange={(e) => queueCompanyField(c, 'reason', e.target.value)}
+                      onBlur={(e) => queueCompanyField(c, 'reason', e.target.value, true)}
                     />
                     <textarea
                       className="notion-comment"
@@ -811,6 +904,27 @@ function compareTodos(a: Todo, b: Todo): number {
   const bCreated = b.createdAt || ''
   if (aCreated !== bCreated) return aCreated > bCreated ? -1 : 1
   return 0
+}
+
+/** Parse "M/D" or "YYYY-MM-DD" folder names into a Date. Returns null if not a date. */
+function parseFolderDate(name: string): Date | null {
+  const short = name.match(/^(\d{1,2})\/(\d{1,2})$/)
+  if (short) {
+    const month = parseInt(short[1]) - 1
+    const day = parseInt(short[2])
+    if (month < 0 || month > 11 || day < 1 || day > 31) return null
+    const now = new Date()
+    const d = new Date(now.getFullYear(), month, day)
+    // If the date is more than 60 days in the future, it probably belongs to last year
+    if (d.getTime() - now.getTime() > 60 * 24 * 60 * 60 * 1000) d.setFullYear(now.getFullYear() - 1)
+    return d
+  }
+  const iso = name.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (iso) {
+    const d = new Date(parseInt(iso[1]), parseInt(iso[2]) - 1, parseInt(iso[3]))
+    return isNaN(d.getTime()) ? null : d
+  }
+  return null
 }
 
 async function patchKeepalive(path: string, body: unknown) {

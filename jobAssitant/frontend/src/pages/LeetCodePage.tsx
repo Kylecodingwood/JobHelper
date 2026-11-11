@@ -1,5 +1,143 @@
-import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { api, ApiError } from '../api/client'
+
+// Topic grouping — mirrors LeetCode Hot 100 categories.
+// We scan ALL tags of a problem and pick the highest-priority match.
+const TOPIC_PRIORITY = [
+  'Sliding Window', 'Two Pointers', 'Binary Search', 'Divide and Conquer',
+  'Stack', 'Monotonic Stack', 'Queue', 'Heap', 'Priority Queue',
+  'Linked List',
+  'Tree', 'Binary Search Tree', 'Trie',
+  'Graph', 'Topological Sort',
+  'DFS', 'BFS', 'Backtracking',
+  'Dynamic Programming',
+  'Bit Manipulation', 'Math',
+  'Hash Table', 'String', 'Array',
+]
+
+const TOPIC_LABELS: Record<string, string> = {
+  'Sliding Window': 'Sliding Window',
+  'Two Pointers': 'Two Pointers',
+  'Binary Search': 'Binary Search',
+  'Divide and Conquer': 'Divide & Conquer',
+  'Stack': 'Stack',
+  'Monotonic Stack': 'Stack',
+  'Queue': 'Queue',
+  'Heap': 'Heap / Priority Queue',
+  'Priority Queue': 'Heap / Priority Queue',
+  'Linked List': 'Linked List',
+  'Tree': 'Trees',
+  'Binary Search Tree': 'Trees',
+  'Trie': 'Trie',
+  'Graph': 'Graphs',
+  'Topological Sort': 'Graphs',
+  'DFS': 'DFS / Backtracking',
+  'BFS': 'BFS',
+  'Backtracking': 'DFS / Backtracking',
+  'Dynamic Programming': 'Dynamic Programming',
+  'Bit Manipulation': 'Bit Manipulation',
+  'Math': 'Math',
+  'Hash Table': 'Hash Table',
+  'String': 'Array & String',
+  'Array': 'Array & String',
+}
+
+function resolveCategory(tags: string[]): string {
+  for (const p of TOPIC_PRIORITY) {
+    if (tags.includes(p)) return TOPIC_LABELS[p] ?? p
+  }
+  return 'Other'
+}
+
+function ProblemItem({ p, selectedId, masteryLabel, openProblem }: {
+  p: Problem
+  selectedId: string | null
+  masteryLabel: (m?: string | null) => string
+  openProblem: (id: string) => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`leetcode-item${p.problemId === selectedId ? ' active' : ''}`}
+      onClick={() => openProblem(p.problemId)}
+    >
+      <span className="leetcode-item-main">
+        <span className="leetcode-num">#{p.problemNumber}</span>
+        <span className="leetcode-title">{p.title}</span>
+      </span>
+      <span className="leetcode-item-meta">
+        <span className={`diff diff-${p.difficulty.toLowerCase()}`}>{p.difficulty}</span>
+        <span className={`mastery mastery-${p.mastery || 'none'}`}>{masteryLabel(p.mastery)}</span>
+        {p.hasReview && p.updatedAt && (
+          <span style={{ fontSize: 11, color: 'var(--ink-muted)', marginLeft: 'auto' }}>
+            {new Date(p.updatedAt).toLocaleDateString()}
+          </span>
+        )}
+      </span>
+    </button>
+  )
+}
+
+function useVoiceInput(onResult: (field: string, text: string) => void) {
+  const [activeField, setActiveField] = useState<string | null>(null)
+  const recRef = useRef<any>(null)
+
+  function start(field: string) {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SR) { alert('Your browser does not support voice input. Try Chrome or Edge.'); return }
+    stop()
+    const rec = new SR()
+    rec.continuous = true
+    rec.interimResults = false
+    rec.lang = 'en-US'
+    rec.onresult = (e: any) => {
+      const text = Array.from(e.results as any[])
+        .slice(e.resultIndex)
+        .map((r: any) => r[0].transcript as string)
+        .join('')
+      onResult(field, text)
+    }
+    rec.onend = () => setActiveField(null)
+    rec.onerror = () => setActiveField(null)
+    rec.start()
+    recRef.current = rec
+    setActiveField(field)
+  }
+
+  function stop() {
+    recRef.current?.stop()
+    recRef.current = null
+    setActiveField(null)
+  }
+
+  return { activeField, start, stop }
+}
+
+function MicButton({ field, activeField, start, stop }: {
+  field: string
+  activeField: string | null
+  start: (f: string) => void
+  stop: () => void
+}) {
+  const active = activeField === field
+  return (
+    <button
+      type="button"
+      title={active ? 'Stop recording' : 'Voice input'}
+      onClick={() => active ? stop() : start(field)}
+      style={{
+        position: 'absolute', bottom: 8, right: 8,
+        background: active ? '#dc2626' : 'var(--primary, #1a4c38)',
+        color: '#fff', border: 'none', borderRadius: 6,
+        width: 28, height: 28, fontSize: 14, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        opacity: activeField && !active ? 0.4 : 1,
+      }}
+    >
+      {active ? '⏹' : '🎤'}
+    </button>
+  )
+}
 
 type Mastery = 'confident' | 'partial' | 'weak'
 
@@ -53,6 +191,31 @@ export function LeetCodePage() {
   const [msg, setMsg] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [loadingDetail, setLoadingDetail] = useState(false)
+  const [groupByTopic, setGroupByTopic] = useState(false)
+  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+
+  const groupedProblems = useMemo(() => {
+    if (!groupByTopic) return null
+    const map = new Map<string, Problem[]>()
+    for (const p of problems) {
+      const cat = resolveCategory(p.tags)
+      if (!map.has(cat)) map.set(cat, [])
+      map.get(cat)!.push(p)
+    }
+    return map
+  }, [problems, groupByTopic])
+
+  function toggleCollapse(cat: string) {
+    setCollapsed((prev) => {
+      const next = new Set(prev)
+      next.has(cat) ? next.delete(cat) : next.add(cat)
+      return next
+    })
+  }
+
+  const { activeField, start, stop } = useVoiceInput((field, text) => {
+    setDraft((d) => ({ ...d, [field]: (d[field as keyof typeof d] as string) + (d[field as keyof typeof d] ? ' ' : '') + text }))
+  })
 
   const selected = useMemo(
     () => problems.find((p) => p.problemId === selectedId) || null,
@@ -219,26 +382,42 @@ export function LeetCodePage() {
 
       <div className="leetcode-split">
         <aside className="leetcode-list-pane">
-          <div className="leetcode-list-head">{problems.length} problems</div>
+          <div className="leetcode-list-head">
+            {problems.length} problems
+            <button
+              type="button"
+              className={`btn btn-sm${groupByTopic ? ' btn-primary' : ''}`}
+              style={{ marginLeft: 'auto', padding: '2px 8px', fontSize: 11 }}
+              onClick={() => setGroupByTopic((v) => !v)}
+            >
+              Topics
+            </button>
+          </div>
           <ul className="leetcode-list">
-            {problems.map((p) => (
-              <li key={p.problemId}>
-                <button
-                  type="button"
-                  className={`leetcode-item${p.problemId === selectedId ? ' active' : ''}`}
-                  onClick={() => void openProblem(p.problemId)}
-                >
-                  <span className="leetcode-item-main">
-                    <span className="leetcode-num">#{p.problemNumber}</span>
-                    <span className="leetcode-title">{p.title}</span>
-                  </span>
-                  <span className="leetcode-item-meta">
-                    <span className={`diff diff-${p.difficulty.toLowerCase()}`}>{p.difficulty}</span>
-                    <span className={`mastery mastery-${p.mastery || 'none'}`}>{masteryLabel(p.mastery)}</span>
-                  </span>
-                </button>
-              </li>
-            ))}
+            {groupedProblems
+              ? Array.from(groupedProblems.entries()).map(([cat, catProblems]) => (
+                  <li key={cat} className="leetcode-topic-group">
+                    <button
+                      type="button"
+                      className="leetcode-topic-header"
+                      onClick={() => toggleCollapse(cat)}
+                    >
+                      <span>{cat}</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ fontSize: 11, color: 'var(--ink-muted)' }}>{catProblems.length}</span>
+                        <span style={{ fontSize: 10 }}>{collapsed.has(cat) ? '▶' : '▼'}</span>
+                      </span>
+                    </button>
+                    {!collapsed.has(cat) && catProblems.map((p) => (
+                      <ProblemItem key={p.problemId} p={p} selectedId={selectedId} masteryLabel={masteryLabel} openProblem={openProblem} />
+                    ))}
+                  </li>
+                ))
+              : problems.map((p) => (
+                  <li key={p.problemId}>
+                    <ProblemItem p={p} selectedId={selectedId} masteryLabel={masteryLabel} openProblem={openProblem} />
+                  </li>
+                ))}
             {!problems.length && <li className="empty-hint">No problems match filters</li>}
           </ul>
         </aside>
@@ -297,22 +476,30 @@ export function LeetCodePage() {
               <form className="leetcode-form" onSubmit={(e) => void onSave(e)}>
                 <label>
                   Confusion / questions
-                  <textarea
-                    required
-                    rows={4}
-                    value={draft.confusion}
-                    onChange={(e) => setDraft({ ...draft, confusion: e.target.value })}
-                    placeholder="What confused you on this pass?"
-                  />
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <textarea
+                      required
+                      rows={4}
+                      value={draft.confusion}
+                      onChange={(e) => setDraft({ ...draft, confusion: e.target.value })}
+                      placeholder="What confused you on this pass?"
+                      style={{ width: '100%', boxSizing: 'border-box', paddingRight: 40 }}
+                    />
+                    <MicButton field="confusion" activeField={activeField} start={start} stop={stop} />
+                  </div>
                 </label>
                 <label>
                   Approach
-                  <textarea
-                    rows={4}
-                    value={draft.approach}
-                    onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
-                    placeholder="Core idea, edge cases, complexity…"
-                  />
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <textarea
+                      rows={4}
+                      value={draft.approach}
+                      onChange={(e) => setDraft({ ...draft, approach: e.target.value })}
+                      placeholder="Core idea, edge cases, complexity…"
+                      style={{ width: '100%', boxSizing: 'border-box', paddingRight: 40 }}
+                    />
+                    <MicButton field="approach" activeField={activeField} start={start} stop={stop} />
+                  </div>
                 </label>
                 <label>
                   Key code

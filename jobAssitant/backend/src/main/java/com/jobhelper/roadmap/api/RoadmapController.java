@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jobhelper.roadmap.application.RoadmapCompanyService;
 import com.jobhelper.roadmap.application.RoadmapDocumentService;
 import com.jobhelper.roadmap.application.RoadmapFolderService;
+import com.jobhelper.roadmap.application.RoadmapRolloverService;
 import com.jobhelper.roadmap.application.RoadmapTodoService;
 
 @RestController
@@ -27,16 +28,24 @@ public class RoadmapController {
     private final RoadmapFolderService folderService;
     private final RoadmapCompanyService companyService;
     private final RoadmapDocumentService documentService;
+    private final RoadmapRolloverService rolloverService;
 
     public RoadmapController(
             RoadmapTodoService todoService,
             RoadmapFolderService folderService,
             RoadmapCompanyService companyService,
-            RoadmapDocumentService documentService) {
+            RoadmapDocumentService documentService,
+            RoadmapRolloverService rolloverService) {
         this.todoService = todoService;
         this.folderService = folderService;
         this.companyService = companyService;
         this.documentService = documentService;
+        this.rolloverService = rolloverService;
+    }
+
+    @PostMapping("/rollover")
+    public Map<String, Object> rollover() {
+        return rolloverService.rollover();
     }
 
     /** Folders + todos / companies / documents for one folder. */

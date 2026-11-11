@@ -9,6 +9,7 @@ import { LeetCodePage } from './pages/LeetCodePage'
 import { LoginPage } from './pages/LoginPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { RoadmapPage } from './pages/RoadmapPage'
+import { ApplicationsPage } from './pages/ApplicationsPage'
 import { getToken } from './api/client'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="profile" element={<ProfilePage />} />
         <Route path="cv" element={<CvPage />} />
         <Route path="behavioral" element={<BehavioralPage />} />
+        <Route path="applications" element={<ApplicationsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

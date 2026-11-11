@@ -30,6 +30,15 @@ public class RoadmapCompanyEntity {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(columnDefinition = "TEXT")
+    private String position;
+
+    @Column(columnDefinition = "TEXT")
+    private String reason;
+
+    @Column(name = "interview_at")
+    private String interviewAt;
+
     @Column(name = "sort_order", nullable = false)
     private int sortOrder;
 
@@ -51,6 +60,12 @@ public class RoadmapCompanyEntity {
     public void setContact(String contact) { this.contact = contact; }
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
+    public String getInterviewAt() { return interviewAt; }
+    public void setInterviewAt(String interviewAt) { this.interviewAt = interviewAt; }
     public int getSortOrder() { return sortOrder; }
     public void setSortOrder(int sortOrder) { this.sortOrder = sortOrder; }
     public Instant getCreatedAt() { return createdAt; }

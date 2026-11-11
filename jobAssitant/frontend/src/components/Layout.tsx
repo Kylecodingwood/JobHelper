@@ -11,7 +11,7 @@ export function Layout() {
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
             Home
           </NavLink>
-          <NavLink to="/jobs" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+          <NavLink to="/jobs" end className={({ isActive }) => (isActive ? 'active' : undefined)}>
             Jobs
           </NavLink>
           <NavLink to="/jobs/sources" className={({ isActive }) => (isActive ? 'active' : undefined)}>
@@ -28,6 +28,9 @@ export function Layout() {
           </NavLink>
           <NavLink to="/behavioral" className={({ isActive }) => (isActive ? 'active' : undefined)}>
             Behavioral
+          </NavLink>
+          <NavLink to="/applications" className={({ isActive }) => (isActive ? 'active' : undefined)}>
+            Apps
           </NavLink>
         </div>
         <NavLink

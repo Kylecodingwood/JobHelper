@@ -11,4 +11,5 @@ public interface RoadmapTodoRepository extends JpaRepository<RoadmapTodoEntity, 
     long countByFolderId(UUID folderId);
 
     List<RoadmapTodoEntity> findByDoneFalseOrderBySortOrderAscUpdatedAtDesc();
+    List<RoadmapTodoEntity> findByFolderIdAndDoneFalse(UUID folderId);
 }

@@ -54,6 +54,9 @@ public class RoadmapCompanyService {
         c.setStatus(normalizeStatus(body == null ? null : body.get("status"), "watching"));
         c.setContact(str(body == null ? null : body.get("contact"), null));
         c.setNote(str(body == null ? null : body.get("note"), null));
+        c.setPosition(str(body == null ? null : body.get("position"), null));
+        c.setReason(str(body == null ? null : body.get("reason"), null));
+        c.setInterviewAt(str(body == null ? null : body.get("interviewAt"), null));
         c.setSortOrder((int) repository.countByFolderId(folderId));
         c.setCreatedAt(now);
         c.setUpdatedAt(now);
@@ -80,6 +83,15 @@ public class RoadmapCompanyService {
             }
             if (body.containsKey("note")) {
                 c.setNote(str(body.get("note"), null));
+            }
+            if (body.containsKey("position")) {
+                c.setPosition(str(body.get("position"), null));
+            }
+            if (body.containsKey("reason")) {
+                c.setReason(str(body.get("reason"), null));
+            }
+            if (body.containsKey("interviewAt")) {
+                c.setInterviewAt(str(body.get("interviewAt"), null));
             }
             if (body.containsKey("folderId")) {
                 UUID folderId = parseUuid(body.get("folderId"));
@@ -133,6 +145,9 @@ public class RoadmapCompanyService {
         m.put("status", c.getStatus());
         m.put("contact", c.getContact());
         m.put("note", c.getNote());
+        m.put("position", c.getPosition());
+        m.put("reason", c.getReason());
+        m.put("interviewAt", c.getInterviewAt());
         m.put("sortOrder", c.getSortOrder());
         m.put("updatedAt", c.getUpdatedAt());
         return m;
@@ -152,4 +167,5 @@ public class RoadmapCompanyService {
         }
         return UUID.fromString(String.valueOf(v));
     }
+
 }

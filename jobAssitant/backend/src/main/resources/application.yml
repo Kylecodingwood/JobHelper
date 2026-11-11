@@ -37,7 +37,7 @@ jobhelper:
     password: ${APP_PASSWORD:changeme}
   jwt:
     secret: ${JWT_SECRET:change-this-secret-to-something-long-and-random}
-    expiry-hours: 24
+    expiry-hours: 8760
   outbox:
     poll-ms: 5000
   backup:
