@@ -14,8 +14,10 @@ A personal job-search management app built for the Irish graduate market. Tracks
 | ![Home](docs/images/home.png) | ![Jobs](docs/images/jobs.png) |
 | **Application roadmap** — per-company todo lists with due dates | **LeetCode tracker** — Hot 100 progress with spaced review |
 | ![Roadmap](docs/images/roadmap.png) | ![LeetCode](docs/images/leetcode.png) |
-| **Behavioural prep** — STAR answer bank with local feedback | **CV library** — version-controlled CV file storage |
-| ![Behavioral](docs/images/behavioral.png) | ![CV](docs/images/cv.png) |
+| **Applications dashboard** — email-parsed job application stats & tracking | **Behavioural prep** — STAR answer bank with local feedback |
+| ![Applications](docs/images/applications.png) | ![Behavioral](docs/images/behavioral.png) |
+| **CV library** — version-controlled CV file storage | |
+| ![CV](docs/images/cv.png) | |
 
 ---
 
@@ -27,6 +29,7 @@ A personal job-search management app built for the Irish graduate market. Tracks
 - **LeetCode Hot 100** — fetches problem content, tracks solve status, surfaces problems due for review
 - **Behavioural question bank** — curated questions with STAR evidence tagging and local rule-based feedback
 - **CV management** — upload and store multiple CV versions (PDF/DOCX)
+- **Applications dashboard** — bulk-import email confirmations, visual stats by category/status, inline status updates, search and filter
 - **Scheduled sync** — automatic job scraping via cron, weekly backup to zip
 
 ---
@@ -66,6 +69,6 @@ docker-compose.yaml
 ## Architecture notes
 
 - **Outbox pattern** for reliable event publishing between modules
-- **Flyway** database migrations (17 versions)
+- **Flyway** database migrations (21 versions)
 - **Domain / application / infrastructure layering** per module
 - **Gate + Rank scoring** for job fit evaluation with duplicate URL normalisation
