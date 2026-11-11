@@ -461,7 +461,7 @@ export function RoadmapPage() {
 
   const KIND_ORDER: FolderKind[] = ['todolist', 'companytracker', 'document']
   const KIND_LABEL: Record<FolderKind, string> = { todolist: '', companytracker: '公司', document: '文档' }
-  const THREE_WEEKS_MS = 21 * 24 * 60 * 60 * 1000
+
 
   async function onFolderDrop(targetFolderId: string) {
     const srcId = dragFolderIdRef.current
